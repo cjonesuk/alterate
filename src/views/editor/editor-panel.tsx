@@ -1,4 +1,4 @@
-import { WorkflowNodeEditorCard } from "@/WorkflowNodeEditorCard";
+import { WorkflowNodeEditorCard } from "@/views/editor/WorkflowNodeEditorCard";
 import { WorkflowEditorHook } from "@/useWorkflowEditor";
 
 type WorkflowEditorPanelProps = WorkflowEditorHook;

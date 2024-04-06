@@ -47,6 +47,7 @@ function mapComponent(
   input: WorkflowEditorNodeInput
 ) {
   const { definition } = input;
+  const key = input.fieldId;
 
   if (definition.type === InputTypes.IGNORED) {
     return null;
@@ -54,27 +55,52 @@ function mapComponent(
 
   if (definition.type === InputTypes.STRING) {
     return (
-      <StringFormField definition={definition} input={input} form={form} />
+      <StringFormField
+        key={key}
+        definition={definition}
+        input={input}
+        form={form}
+      />
     );
   }
 
   if (definition.type === InputTypes.INT) {
-    return <IntFormField definition={definition} input={input} form={form} />;
+    return (
+      <IntFormField
+        key={key}
+        definition={definition}
+        input={input}
+        form={form}
+      />
+    );
   }
 
   if (definition.type === InputTypes.FLOAT) {
-    return <FloatFormField definition={definition} input={input} form={form} />;
+    return (
+      <FloatFormField
+        key={key}
+        definition={definition}
+        input={input}
+        form={form}
+      />
+    );
   }
 
   if (definition.type === InputTypes.BOOLEAN) {
     return (
-      <BooleanFormField definition={definition} input={input} form={form} />
+      <BooleanFormField
+        key={key}
+        definition={definition}
+        input={input}
+        form={form}
+      />
     );
   }
 
   if (definition.type === InputTypes.STRING_VALUES) {
     return (
       <StringValuesFormField
+        key={key}
         definition={definition}
         input={input}
         form={form}
@@ -83,7 +109,7 @@ function mapComponent(
   }
 
   return (
-    <div key={input.fieldId}>
+    <div key={key}>
       {input.definition.name} - {input.value} UNSUPPORTED
     </div>
   );

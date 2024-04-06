@@ -33,7 +33,6 @@ export function StringFormField({
   if (definition.multiline) {
     return (
       <FormField
-        key={input.fieldId}
         control={form.control}
         name={input.fieldId}
         defaultValue={input.value}
@@ -56,7 +55,6 @@ export function StringFormField({
 
   return (
     <FormField
-      key={input.fieldId}
       control={form.control}
       name={input.fieldId}
       defaultValue={input.value}
@@ -80,7 +78,6 @@ export function IntFormField({
 }: InputFormFieldProps<IntType>) {
   return (
     <FormField
-      key={input.fieldId}
       control={form.control}
       name={input.fieldId}
       defaultValue={input.value}
@@ -109,7 +106,6 @@ export function FloatFormField({
 }: InputFormFieldProps<FloatType>) {
   return (
     <FormField
-      key={input.fieldId}
       control={form.control}
       name={input.fieldId}
       defaultValue={input.value}
@@ -139,7 +135,6 @@ export function BooleanFormField({
 }: InputFormFieldProps<BooleanType>) {
   return (
     <FormField
-      key={input.fieldId}
       control={form.control}
       name={input.fieldId}
       defaultValue={input.value}
@@ -163,7 +158,6 @@ export function StringValuesFormField({
 }: InputFormFieldProps<StringValuesType>) {
   return (
     <FormField
-      key={input.fieldId}
       control={form.control}
       name={input.fieldId}
       defaultValue={input.value}

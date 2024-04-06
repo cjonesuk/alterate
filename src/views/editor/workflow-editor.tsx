@@ -4,37 +4,46 @@ import { Sidebar } from "../../components/layout/sidebar";
 import { Button } from "../../components/ui/button";
 import { FormProvider } from "../../components/ui/form";
 
-import { useWorkflowEditor } from "../../useWorkflowEditor";
+import { WorkflowEditorHook, useWorkflowEditor } from "../../useWorkflowEditor";
 import { JobProgress } from "./job-progress";
 import { PreviewImage } from "./preview-image";
 
-export function WorkflowEditorView() {
-  const connection = useComfyUIWebsocket();
-  const { isLoading, error, editors, form, submit } = useWorkflowEditor();
+type WorkflowEditorPanelProps = WorkflowEditorHook;
 
-  if (isLoading) {
-    return <div>Loading ComfyUI node definitions...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading ComfyUI node definitions: {error.message}</div>;
-  }
+function WorkflowEditorPanel({
+  isLoading,
+  error,
+  editors,
+  form,
+}: WorkflowEditorPanelProps) {
+  const editorCards = editors?.map((editor) => {
+    return (
+      <WorkflowNodeEditorCard key={editor.nodeId} editor={editor} form={form} />
+    );
+  });
 
   return (
-    <FormProvider {...form}>
+    <div className="flex flex-row flex-wrap justify-start gap-2 min-h-[200px]">
+      {isLoading && <div>Loading ComfyUI node definitions...</div>}
+
+      {error && (
+        <div>Error loading ComfyUI node definitions: {error.message}</div>
+      )}
+
+      {editorCards}
+    </div>
+  );
+}
+
+export function WorkflowEditorView() {
+  const connection = useComfyUIWebsocket();
+  const workflowEditor = useWorkflowEditor();
+
+  return (
+    <FormProvider {...workflowEditor.form}>
       <div className="w-full flex flex-row items-start p-4">
         <div className="flex-grow">
-          <div className="flex flex-row flex-wrap justify-start gap-2 ">
-            {editors?.map((editor) => {
-              return (
-                <WorkflowNodeEditorCard
-                  key={editor.nodeId}
-                  editor={editor}
-                  form={form}
-                />
-              );
-            })}
-          </div>
+          <WorkflowEditorPanel {...workflowEditor} />
         </div>
 
         <Sidebar>
@@ -42,7 +51,7 @@ export function WorkflowEditorView() {
 
           <JobProgress percentage={connection.status.percentage} />
 
-          <Button type="button" onClick={submit}>
+          <Button type="button" onClick={workflowEditor.submit}>
             Queue Job
           </Button>
         </Sidebar>

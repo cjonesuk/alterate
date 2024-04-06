@@ -102,6 +102,8 @@ function makeEditors(
   return editors.filter(Boolean) as WorkflowEditorNode[];
 }
 
+export type WorkflowEditorHook = ReturnType<typeof useWorkflowEditor>;
+
 export function useWorkflowEditor() {
   const { definitions, error, isLoading } = useNodeDefinitions();
   const form = useForm();

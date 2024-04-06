@@ -1,30 +1,21 @@
-# React + TypeScript + Vite
+# Alterate
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A play on the words alter, generate and iterate. This project aims to implement a UI dashboard for creating images using [ComfyUI](https://github.com/comfyanonymous/ComfyUI) as a backend
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### ComfyUI
 
-## Expanding the ESLint configuration
+1. Install ComfyUI using their instructions
+2. Enable CORS by adding `--enable-cors-header` into the `run_nvidia_gpu.bat` file
 
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
+## Installation
 
-- Configure the top-level `parserOptions` property like this:
+1. Download this repo
+2. Run `npm install` to install all dependencies
 
-```js
-export default {
-  // other rules...
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
-    tsconfigRootDir: __dirname,
-  },
-}
-```
+## Running
 
-- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
-- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+1. Run ComfyUI using the batch file and make sure it is usable via their UI
+2. Run `npm run dev` to start Alterate
+3. Open [http://localhost:5173/](http://localhost:5173/)

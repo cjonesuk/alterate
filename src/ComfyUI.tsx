@@ -17,7 +17,7 @@ export function ComfyUI() {
 
   return (
     <div>
-      <h2>ComfySteps</h2>
+      <h2>Alterate</h2>
       <Form {...form}>
         <Button type="button" onClick={submit}>
           Queue Job

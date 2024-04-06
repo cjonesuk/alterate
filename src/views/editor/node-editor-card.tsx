@@ -13,7 +13,7 @@ import {
   WorkflowEditorForm,
   WorkflowEditorNode,
   WorkflowEditorNodeInput,
-} from "./useWorkflowEditor";
+} from "./use-workflow-editor";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import {
   BooleanFormField,

@@ -1,5 +1,5 @@
 import { NodeEditorCard } from "@/views/editor/node-editor-card";
-import { WorkflowEditorHook } from "@/useWorkflowEditor";
+import { WorkflowEditorHook } from "@/views/editor/useWorkflowEditor";
 
 type WorkflowEditorPanelProps = WorkflowEditorHook;
 

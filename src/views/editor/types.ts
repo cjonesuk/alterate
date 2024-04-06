@@ -1,7 +1,7 @@
 import {
   WorkflowEditorForm,
   WorkflowEditorNodeInput,
-} from "@/useWorkflowEditor";
+} from "@/views/editor/useWorkflowEditor";
 
 export interface InputFormFieldProps<T> {
   definition: T;

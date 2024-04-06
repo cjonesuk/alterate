@@ -1,16 +1,16 @@
-import original_workflow_data from "./assets/workflow_api.json";
+import original_workflow_data from "../../assets/workflow_api.json";
 import {
   AnyInputType,
   InputTypes,
   NodeDefinition,
   NodeDefinitionMap,
   useNodeDefinitions,
-} from "./comfyui/useObjectInfo";
-import { WorkflowDocument, WorkflowNode } from "./comfyui/types/workflow";
+} from "../../comfyui/useObjectInfo";
+import { WorkflowDocument, WorkflowNode } from "../../comfyui/types/workflow";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 
-import { queueWorkflow } from "./comfyui/api";
+import { queueWorkflow } from "../../comfyui/api";
 
 export type WorkflowNodeValueKey = [string, string];
 

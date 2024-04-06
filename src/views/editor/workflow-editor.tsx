@@ -3,7 +3,7 @@ import { Sidebar } from "../../components/layout/sidebar";
 import { Button } from "../../components/ui/button";
 import { FormProvider } from "../../components/ui/form";
 
-import { useWorkflowEditor } from "../../useWorkflowEditor";
+import { useWorkflowEditor } from "./useWorkflowEditor";
 import { WorkflowEditorPanel } from "./editor-panel";
 import { JobProgress } from "./job-progress";
 import { PreviewImage } from "./preview-image";

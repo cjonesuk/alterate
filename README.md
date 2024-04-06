@@ -47,3 +47,10 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [ ] Inpainting workflow support
 - [ ] Multi workflow projects
 - [ ] Built in image editing using workflows
+
+## Dependencies
+
+- Vite
+- React
+- [Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/introduction)
+- [Shadcn](https://ui.shadcn.com/)

@@ -24,8 +24,44 @@ function useLiveImage() {
   return { imageUrl, updateImage };
 }
 
+function useStatus() {
+  const [currentSteps, setCurrentSteps] = useState(0);
+  const [totalSteps, setTotalSteps] = useState(0);
+
+  const updateProgress = useCallback(
+    (current: number, total: number) => {
+      setCurrentSteps(current);
+      setTotalSteps(total);
+    },
+    [setCurrentSteps, setTotalSteps]
+  );
+
+  const percentage = totalSteps > 0 ? currentSteps / totalSteps : 0;
+
+  return {
+    currentSteps,
+    totalSteps,
+    percentage,
+    updateProgress,
+  };
+}
+
+interface ProgressMessage {
+  type: "progress";
+  data: {
+    value: number;
+    max: number;
+    prompt_id: string;
+  };
+}
+
+interface StatusMessage {
+  type: "status";
+}
+
 export function useComfyUIWebsocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
+  const { updateProgress, currentSteps, totalSteps, percentage } = useStatus();
   const { imageUrl, updateImage } = useLiveImage();
 
   useEffect(() => {
@@ -46,7 +82,9 @@ export function useComfyUIWebsocket() {
     ws.onmessage = (event) => {
       console.log("Received message from ComfyUI websocket", event.data);
 
-      if (event.data instanceof ArrayBuffer) {
+      const data = event.data as ArrayBuffer | string;
+
+      if (data instanceof ArrayBuffer) {
         console.log("Received array buffer message from ComfyUI websocket");
         const view = new DataView(event.data);
         const eventType = view.getUint32(0);
@@ -71,6 +109,19 @@ export function useComfyUIWebsocket() {
             `Unknown binary websocket message of type ${eventType}`
           );
         }
+
+        return;
+      }
+
+      const message = JSON.parse(data) as ProgressMessage | StatusMessage;
+
+      if (message.type === "progress") {
+        updateProgress(message.data.value, message.data.max);
+        return;
+      }
+
+      if (message.type === "status") {
+        console.log("STATUS MESSAGE", message);
       }
     };
 
@@ -79,10 +130,15 @@ export function useComfyUIWebsocket() {
     return () => {
       ws.close();
     };
-  }, []);
+  }, [updateImage, updateProgress]);
 
   return {
     socket,
     imageUrl,
+    status: {
+      currentSteps,
+      totalSteps,
+      percentage,
+    },
   };
 }

@@ -46,6 +46,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
       if (definition.multiline) {
         return (
           <FormField
+            key={input.fieldId}
             control={form.control}
             name={input.fieldId}
             defaultValue={input.value}
@@ -68,6 +69,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
 
       return (
         <FormField
+          key={input.fieldId}
           control={form.control}
           name={input.fieldId}
           defaultValue={input.value}
@@ -87,6 +89,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
     if (definition.type === InputTypes.INT) {
       return (
         <FormField
+          key={input.fieldId}
           control={form.control}
           name={input.fieldId}
           defaultValue={input.value}
@@ -111,6 +114,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
     if (definition.type === InputTypes.FLOAT) {
       return (
         <FormField
+          key={input.fieldId}
           control={form.control}
           name={input.fieldId}
           defaultValue={input.value}
@@ -136,6 +140,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
     if (definition.type === InputTypes.BOOLEAN) {
       return (
         <FormField
+          key={input.fieldId}
           control={form.control}
           name={input.fieldId}
           defaultValue={input.value}
@@ -158,6 +163,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
     if (definition.type === InputTypes.STRING_VALUES) {
       return (
         <FormField
+          key={input.fieldId}
           control={form.control}
           name={input.fieldId}
           defaultValue={input.value}
@@ -186,7 +192,7 @@ export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
     }
 
     return (
-      <div>
+      <div key={input.fieldId}>
         {input.definition.name} - {input.value} UNSUPPORTED
       </div>
     );

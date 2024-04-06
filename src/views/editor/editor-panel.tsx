@@ -1,4 +1,4 @@
-import { WorkflowNodeEditorCard } from "@/views/editor/WorkflowNodeEditorCard";
+import { NodeEditorCard } from "@/views/editor/node-editor-card";
 import { WorkflowEditorHook } from "@/useWorkflowEditor";
 
 type WorkflowEditorPanelProps = WorkflowEditorHook;
@@ -10,9 +10,7 @@ export function WorkflowEditorPanel({
   form,
 }: WorkflowEditorPanelProps) {
   const editorCards = editors?.map((editor) => {
-    return (
-      <WorkflowNodeEditorCard key={editor.nodeId} editor={editor} form={form} />
-    );
+    return <NodeEditorCard key={editor.nodeId} editor={editor} form={form} />;
   });
 
   return (

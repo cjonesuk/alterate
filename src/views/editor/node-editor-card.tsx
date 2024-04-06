@@ -28,7 +28,21 @@ interface Props {
   form: WorkflowEditorForm;
 }
 
-function mapInputs(
+export const NodeEditorCard: React.FC<Props> = ({ editor, form }) => {
+  const inputs = editor.inputs.map((input) => mapComponent(form, input));
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle> {editor.node._meta.title}</CardTitle>
+        <CardDescription> {editor.node.class_type}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col space-y-2">{inputs}</CardContent>
+    </Card>
+  );
+};
+
+function mapComponent(
   form: UseFormReturn<FieldValues, unknown, undefined>,
   input: WorkflowEditorNodeInput
 ) {
@@ -74,17 +88,3 @@ function mapInputs(
     </div>
   );
 }
-
-export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
-  const inputs = editor.inputs.map((input) => mapInputs(form, input));
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle> {editor.node._meta.title}</CardTitle>
-        <CardDescription> {editor.node.class_type}</CardDescription>
-      </CardHeader>
-      <CardContent className="flex flex-col space-y-2">{inputs}</CardContent>
-    </Card>
-  );
-};

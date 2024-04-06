@@ -1,10 +1,12 @@
 import { WorkflowNodeEditorCard } from "./WorkflowNodeEditorCard";
+import { useComfyUIWebsocket } from "./comfyui/useComfyUIWebsocket";
 import { Button } from "./components/ui/button";
 import { Form } from "./components/ui/form";
 
 import { useWorkflowEditor } from "./useWorkflowEditor";
 
 export function ComfyUI() {
+  const { imageUrl } = useComfyUIWebsocket();
   const { isLoading, error, editors, form, submit } = useWorkflowEditor();
 
   if (isLoading) {
@@ -15,9 +17,14 @@ export function ComfyUI() {
     return <div>Error loading ComfyUI node definitions: {error.message}</div>;
   }
 
+  const displayImage = imageUrl ? <img src={imageUrl} /> : null;
+
   return (
     <div>
       <h2>Alterate</h2>
+
+      <div>{displayImage}</div>
+
       <Form {...form}>
         <Button type="button" onClick={submit}>
           Queue Job

@@ -12,25 +12,6 @@ import { useForm } from "react-hook-form";
 
 import { queueWorkflow } from "./comfyui/api";
 
-//const clientId = str(uuidv4());
-// function useComfyUIWebsocket() {
-//   const [socket, setSocket] = useState<WebSocket | null>(null);
-//   useEffect(() => {
-//     const url = getWsUrl(clientId);
-//     const ws = new WebSocket(url);
-//     ws.onopen = () => {
-//       console.log("Connected to ComfyUI websocket");
-//     };
-//     ws.onclose = () => {
-//       console.log("Disconnected from ComfyUI websocket");
-//     };
-//     setSocket(ws);
-//     return () => {
-//       ws.close();
-//     };
-//   }, []);
-//   return socket;
-// }
 export type WorkflowNodeValueKey = [string, string];
 
 export type WorkflowEditorNodeInputKey = [string, string];

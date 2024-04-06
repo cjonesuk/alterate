@@ -1,12 +1,12 @@
 import { useComfyUIWebsocket } from "../../comfyui/useComfyUIWebsocket";
 import { Sidebar } from "../../components/layout/sidebar";
-import { Button } from "../../components/ui/button";
 import { FormProvider } from "../../components/ui/form";
 
 import { useWorkflowEditor } from "./use-workflow-editor";
 import { WorkflowEditorPanel } from "./editor-panel";
 import { JobProgress } from "./job-progress";
 import { PreviewImage } from "./preview-image";
+import { QueueManager } from "./queue-manager";
 
 export function WorkflowEditorView() {
   const connection = useComfyUIWebsocket();
@@ -22,11 +22,12 @@ export function WorkflowEditorView() {
         <Sidebar>
           <PreviewImage src={connection.imageUrl} />
 
-          <JobProgress percentage={connection.status.percentage} />
+          <JobProgress progress={connection.progress} />
 
-          <Button type="button" onClick={workflowEditor.submit}>
-            Queue Job
-          </Button>
+          <QueueManager
+            submit={workflowEditor.submit}
+            queue={connection.queue}
+          />
         </Sidebar>
       </div>
     </FormProvider>

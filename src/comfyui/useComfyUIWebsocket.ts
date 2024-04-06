@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 
 import { getWsUrl } from "./api";
 import { useStatus } from "./useStatus";
-
-const clientId = uuidv4();
 
 function useLiveImage() {
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -36,15 +33,61 @@ interface ProgressMessage {
 
 interface StatusMessage {
   type: "status";
+  data: {
+    status: {
+      exec_info: {
+        queue_remaining: number;
+      };
+    };
+  };
 }
+
+interface ExecutionStartedMessage {
+  type: "execution_started";
+  data: {
+    prompt_id: string;
+  };
+}
+
+interface ExecutingMessage {
+  type: "executing";
+  data: {
+    node: string;
+    prompt_id: string;
+  };
+}
+
+interface ExecutedMessage {
+  type: "executed";
+  data: {
+    node: string | null;
+    prompt_id: string;
+  };
+}
+
+interface ExecutionCachedMessage {
+  type: "execution_cached";
+  data: {
+    nodes: string[];
+    prompt_id: string;
+  };
+}
+
+type WebsocketMessage =
+  | ProgressMessage
+  | StatusMessage
+  | ExecutionStartedMessage
+  | ExecutingMessage
+  | ExecutedMessage
+  | ExecutionCachedMessage;
 
 export function useComfyUIWebsocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
-  const { updateProgress, currentSteps, totalSteps, percentage } = useStatus();
+  const { updateProgress, updateQueueLength, progress, queue } = useStatus();
   const { imageUrl, updateImage } = useLiveImage();
 
   useEffect(() => {
-    const url = getWsUrl(clientId);
+    const url = getWsUrl();
     const ws = new WebSocket(url);
     ws.binaryType = "arraybuffer";
 
@@ -61,10 +104,9 @@ export function useComfyUIWebsocket() {
     ws.onmessage = (event) => {
       console.log("Received message from ComfyUI websocket", event.data);
 
-      const data = event.data as ArrayBuffer | string;
+      const data = event.data;
 
       if (data instanceof ArrayBuffer) {
-        console.log("Received array buffer message from ComfyUI websocket");
         const view = new DataView(event.data);
         const eventType = view.getUint32(0);
         const buffer = event.data.slice(4);
@@ -84,23 +126,27 @@ export function useComfyUIWebsocket() {
 
           updateImage(imageBlob);
         } else {
-          throw new Error(
-            `Unknown binary websocket message of type ${eventType}`
-          );
+          console.error("Unknown binary websocket message of type", eventType);
         }
 
         return;
       }
 
-      const message = JSON.parse(data) as ProgressMessage | StatusMessage;
+      if (typeof data === "string") {
+        console.log("Received string message from ComfyUI websocket", data);
+        const message = JSON.parse(data as string) as WebsocketMessage;
 
-      if (message.type === "progress") {
-        updateProgress(message.data.value, message.data.max);
-        return;
-      }
+        if (message.type === "progress") {
+          updateProgress(message.data.value, message.data.max);
+          return;
+        }
 
-      if (message.type === "status") {
-        console.log("STATUS MESSAGE", message);
+        if (message.type === "status") {
+          updateQueueLength(message.data.status.exec_info.queue_remaining);
+          return;
+        }
+
+        console.error("Unknown websocket message", message);
       }
     };
 
@@ -109,15 +155,12 @@ export function useComfyUIWebsocket() {
     return () => {
       ws.close();
     };
-  }, [updateImage, updateProgress]);
+  }, [updateImage, updateProgress, updateQueueLength]);
 
   return {
     socket,
     imageUrl,
-    status: {
-      currentSteps,
-      totalSteps,
-      percentage,
-    },
+    progress,
+    queue,
   };
 }

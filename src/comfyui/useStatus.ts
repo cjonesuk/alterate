@@ -1,34 +1,64 @@
 import { useCallback, useState } from "react";
 
-export interface StatusSummary {
-  currentSteps: number;
-  totalSteps: number;
+export interface ProgressSummary {
+  step: number;
+  steps: number;
+  ratio: number;
   percentage: number;
+}
+
+export interface QueueSummary {
+  length: number;
+}
+
+export interface StatusSummary {
+  progress: ProgressSummary;
+  queue: QueueSummary;
 }
 
 type StatusHook = StatusSummary & {
   updateProgress: (current: number, total: number) => void;
+  updateQueueLength: (input: number) => void;
 };
 
 export function useStatus(): StatusHook {
-  const [currentSteps, setCurrentSteps] = useState(0);
-  const [totalSteps, setTotalSteps] = useState(0);
+  const [progress, setProgress] = useState<ProgressSummary>({
+    step: 0,
+    steps: 0,
+    ratio: 0,
+    percentage: 0,
+  });
+  const [queue, setQueue] = useState<QueueSummary>({
+    length: 0,
+  });
 
   const updateProgress = useCallback(
     (current: number, total: number) => {
-      setCurrentSteps(current);
-      setTotalSteps(total);
+      const ratio = current / total;
+
+      setProgress({
+        step: current,
+        steps: total,
+        ratio: total > 0 ? ratio : 0,
+        percentage: total > 0 ? ratio * 100 : 0,
+      });
     },
-    [setCurrentSteps, setTotalSteps]
+    [setProgress]
   );
 
-  const ratio = totalSteps > 0 ? currentSteps / totalSteps : 0;
-  const percentage = ratio * 100;
+  const updateQueueLength = useCallback(
+    (input: number) => {
+      setQueue({
+        length: input,
+      });
+    },
+    [setQueue]
+  );
 
   return {
-    currentSteps,
-    totalSteps,
-    percentage,
+    progress,
+    queue,
     updateProgress,
+    updateQueueLength,
   };
 }

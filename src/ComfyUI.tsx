@@ -1,13 +1,15 @@
+import { ConeIcon } from "lucide-react";
 import { WorkflowNodeEditorCard } from "./WorkflowNodeEditorCard";
-import { useComfyUIWebsocket } from "./comfyui/useComfyUIWebsocket";
+import {
+  StatusSummary,
+  useComfyUIWebsocket,
+} from "./comfyui/useComfyUIWebsocket";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 import { Button } from "./components/ui/button";
-import { Form } from "./components/ui/form";
+import { FormProvider } from "./components/ui/form";
 import { Progress } from "./components/ui/progress";
 
 import { useWorkflowEditor } from "./useWorkflowEditor";
-
-type LiveStatusProps = ReturnType<typeof useComfyUIWebsocket>;
 
 function PreviewImage({ src }: { src: string | undefined | null }) {
   return (
@@ -30,13 +32,26 @@ function PreviewImage({ src }: { src: string | undefined | null }) {
   );
 }
 
-function LiveStatus({ imageUrl, status }: LiveStatusProps) {
+interface JobProgressProps {
+  percentage: number;
+}
+
+function JobProgress({ percentage }: JobProgressProps) {
   return (
     <div className="flex flex-col gap-2">
-      <PreviewImage src={imageUrl} />
-
-      <Progress value={status.percentage * 100} />
+      <Progress value={percentage} />
     </div>
+  );
+}
+
+interface SidebarProps {
+  children?: React.ReactNode | React.ReactNode[] | null | undefined;
+}
+function Sidebar({ children }: SidebarProps) {
+  return (
+    <aside className="border-2 rounded-md p-2 flex flex-col gap-4">
+      {children}
+    </aside>
   );
 }
 
@@ -53,14 +68,10 @@ export function ComfyUI() {
   }
 
   return (
-    <div className="w-full flex flex-row items-start p-4">
-      <div className="flex-grow">
-        <h2>Alterate</h2>
-
-        <Form {...form}>
-          <Button type="button" onClick={submit}>
-            Queue Job
-          </Button>
+    <FormProvider {...form}>
+      <div className="w-full flex flex-row items-start p-4">
+        <div className="flex-grow">
+          <h2>Alterate</h2>
 
           <div className="flex flex-row flex-wrap justify-start gap-2 p-2">
             {editors?.map((editor) => {
@@ -73,12 +84,18 @@ export function ComfyUI() {
               );
             })}
           </div>
-        </Form>
-      </div>
+        </div>
 
-      <aside className="">
-        <LiveStatus {...connection} />
-      </aside>
-    </div>
+        <Sidebar>
+          <PreviewImage src={connection.imageUrl} />
+
+          <JobProgress percentage={connection.status.percentage} />
+
+          <Button type="button" onClick={submit}>
+            Queue Job
+          </Button>
+        </Sidebar>
+      </div>
+    </FormProvider>
   );
 }

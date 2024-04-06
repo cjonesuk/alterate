@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 
 import { getWsUrl } from "./api";
+import { useStatus } from "./useStatus";
 
 const clientId = uuidv4();
 
@@ -22,28 +23,6 @@ function useLiveImage() {
   );
 
   return { imageUrl, updateImage };
-}
-
-function useStatus() {
-  const [currentSteps, setCurrentSteps] = useState(0);
-  const [totalSteps, setTotalSteps] = useState(0);
-
-  const updateProgress = useCallback(
-    (current: number, total: number) => {
-      setCurrentSteps(current);
-      setTotalSteps(total);
-    },
-    [setCurrentSteps, setTotalSteps]
-  );
-
-  const percentage = totalSteps > 0 ? currentSteps / totalSteps : 0;
-
-  return {
-    currentSteps,
-    totalSteps,
-    percentage,
-    updateProgress,
-  };
 }
 
 interface ProgressMessage {

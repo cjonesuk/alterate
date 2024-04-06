@@ -2,7 +2,7 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 export function PreviewImage({ src }: { src: string | undefined | null }) {
   return (
-    <div className="w-[200px] min-w-[200px] min-h-[200px] flex border-2 rounded-md">
+    <div className="w-[200px] min-w-[200px] min-h-[200px] flex border-2 rounded-md ">
       {src && (
         <AspectRatio ratio={16 / 16}>
           <img

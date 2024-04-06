@@ -23,3 +23,27 @@ A play on the words alter, generate and iterate. This project aims to implement 
 1. Run ComfyUI using the batch file and make sure it is usable via their UI
 2. Run `npm run dev` to start Alterate
 3. Open [http://localhost:5173/](http://localhost:5173/)
+
+## Goals and direction
+
+### Short term
+
+- [x] Setup web socket
+- [x] Submit job to ComfyUI
+- [x] Edit inputs on workflow via UI
+- [x] Submit modified workflow to ComfyUI
+- [x] Display progress images via websocket
+- [x] Display progress bar via websocket
+- [ ] Websocket reconnection handling
+- [ ] Display final output images
+- [ ] Show progress details (node stage)
+- [ ] Cancel current job
+- [ ] Loading a workflow (removing built in default workflow)
+- [ ] Improve node editor panel UI
+
+### Long term
+
+- [ ] Image editor
+- [ ] Inpainting workflow support
+- [ ] Multi workflow projects
+- [ ] Built in image editing using workflows

@@ -12,7 +12,6 @@ import {
 import { WorkflowEditorNode } from "./useWorkflowEditor";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import { Input } from "./components/ui/input";
-import { Label } from "./components/ui/label";
 import { Textarea } from "./components/ui/textarea";
 import { Switch } from "./components/ui/switch";
 import {
@@ -24,7 +23,6 @@ import {
 } from "./components/ui/select";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -39,7 +37,6 @@ interface Props {
 export const WorkflowNodeEditorCard: React.FC<Props> = ({ editor, form }) => {
   const inputs = editor.inputs.map((input) => {
     const { definition } = input;
-    const id = `input-${input.fieldId}`;
 
     if (definition.type === InputTypes.IGNORED) {
       return null;

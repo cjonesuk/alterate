@@ -146,6 +146,26 @@ export function useComfyUIWebsocket() {
           return;
         }
 
+        if (message.type === "execution_cached") {
+          console.log("Execution cached", message.data.nodes);
+          return;
+        }
+
+        if (message.type === "execution_started") {
+          console.log("Execution started", message.data.prompt_id);
+          return;
+        }
+
+        if (message.type === "executing") {
+          console.log("Executing node", message.data.node);
+          return;
+        }
+
+        if (message.type === "executed") {
+          console.log("Executed node", message.data.node);
+          return;
+        }
+
         console.error("Unknown websocket message", message);
       }
     };

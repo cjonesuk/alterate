@@ -34,7 +34,7 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Submit modified workflow to ComfyUI
 - [x] Display progress images via websocket
 - [x] Display progress bar via websocket
-- [ ] Navigate to ComfyUI
+- [x] Navigate to ComfyUI
 - [ ] Websocket reconnection handling
 - [ ] Display final output images
 - [ ] Show progress details (node stage)

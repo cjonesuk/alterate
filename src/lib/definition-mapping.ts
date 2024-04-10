@@ -4,8 +4,7 @@ import {
   InputDefinition,
   ObjectInfoRoot,
   ObjectNode,
-} from "./types/node-definitions";
-import { fetchObjectInfo } from "./api";
+} from "./comfyui/node-definitions";
 
 export const InputTypes = {
   INT: "types/INT",
@@ -177,7 +176,7 @@ function mapNode(
 
 export type NodeDefinitionMap = Map<string, NodeDefinition>;
 
-function mapObjectInfo(root: ObjectInfoRoot): NodeDefinitionMap {
+export function mapObjectInfo(root: ObjectInfoRoot): NodeDefinitionMap {
   const nodeNames = Object.keys(root);
 
   const nodeDefinitions = nodeNames
@@ -191,9 +190,4 @@ function mapObjectInfo(root: ObjectInfoRoot): NodeDefinitionMap {
   return new Map<string, NodeDefinition>(
     nodeDefinitions.map((x) => [x?.class_type, x])
   );
-}
-
-export async function fetchAndMapObjectInfo() {
-  const objectInfo = await fetchObjectInfo();
-  return mapObjectInfo(objectInfo);
 }

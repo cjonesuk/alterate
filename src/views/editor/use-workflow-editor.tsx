@@ -4,8 +4,8 @@ import {
   InputTypes,
   NodeDefinition,
   NodeDefinitionMap,
-} from "../../comfyui/useObjectInfo";
-import { WorkflowDocument, WorkflowNode } from "../../comfyui/types/workflow";
+} from "../../lib/definition-mapping";
+import { WorkflowDocument, WorkflowNode } from "../../lib/comfyui/workflow";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useAlterateStore } from "@/lib/store";

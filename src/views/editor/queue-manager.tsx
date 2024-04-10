@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { WorkflowEditorHook } from "./use-workflow-editor";
-import { getHttpUrl } from "@/comfyui/api";
+import { getComfyUiHttpUrl } from "@/lib/comfyui/api";
 import { useAlterateStore } from "@/lib/store";
 
 interface Props {
@@ -9,9 +9,14 @@ interface Props {
 
 export function QueueManager({ submit }: Props) {
   const queue = useAlterateStore((store) => store.backend.queue);
+  const connection = useAlterateStore((store) => store.backend.connection);
+
+  if (!connection) {
+    return <div>Not connected</div>;
+  }
 
   // todo: move to store
-  const comfyuiUrl = getHttpUrl();
+  const comfyuiUrl = getComfyUiHttpUrl(connection);
 
   return (
     <div className="flex flex-col gap-2">

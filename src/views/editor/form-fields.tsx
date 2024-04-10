@@ -4,7 +4,7 @@ import {
   IntType,
   StringType,
   StringValuesType,
-} from "../../comfyui/useObjectInfo";
+} from "../../lib/definition-mapping";
 
 import { Input } from "../../components/ui/input";
 import { Textarea } from "../../components/ui/textarea";

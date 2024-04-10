@@ -1,12 +1,10 @@
-import { WebsocketMessage } from "@/comfyui/types/websocket";
-import {
-  NodeDefinitionMap,
-  fetchAndMapObjectInfo,
-} from "@/comfyui/useObjectInfo";
+import { fetchObjectInfo } from "@/lib/comfyui/api";
+import { WebsocketMessage } from "@/lib/comfyui/websocket";
+import { NodeDefinitionMap, mapObjectInfo } from "@/lib/definition-mapping";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 
-type ConnectionDetails = {
+export type ConnectionDetails = {
   machineName: string;
   port: number;
   clientId: string;
@@ -265,7 +263,14 @@ const alterateStore = create<Store>()(
     },
 
     refreshDefinitions: async () => {
-      const definitions = await fetchAndMapObjectInfo();
+      const connection = get().backend.connection;
+      if (!connection) {
+        console.error("No connection details available");
+        return;
+      }
+
+      const objectInfo = await fetchObjectInfo(connection);
+      const definitions = mapObjectInfo(objectInfo);
 
       set((state) => {
         state.backend.definitionns = definitions;

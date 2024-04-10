@@ -1,4 +1,4 @@
-import { InputTypes } from "../../comfyui/useObjectInfo";
+import { InputTypes } from "../../lib/definition-mapping";
 
 import React from "react";
 

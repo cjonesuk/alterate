@@ -1,6 +1,7 @@
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useAlterateStore } from "@/lib/store";
 
-export function PreviewImage({ src }: { src: string | undefined | null }) {
+function PreviewImage({ src }: { src: string | undefined | null }) {
   return (
     <div className="w-[200px] min-w-[200px] min-h-[200px] flex border-2 rounded-md ">
       {src && (
@@ -19,4 +20,10 @@ export function PreviewImage({ src }: { src: string | undefined | null }) {
       )}
     </div>
   );
+}
+
+export function LivePreviewImage() {
+  const imageUrl = useAlterateStore((store) => store.backend.liveImageUrl);
+
+  return <PreviewImage src={imageUrl} />;
 }

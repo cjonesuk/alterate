@@ -1,11 +1,9 @@
-import { ProgressSummary } from "@/comfyui/useStatus";
 import { Progress } from "@/components/ui/progress";
+import { useAlterateStore } from "@/lib/store";
 
-interface Props {
-  progress: ProgressSummary;
-}
+export function JobProgress() {
+  const progress = useAlterateStore((store) => store.backend.progress);
 
-export function JobProgress({ progress }: Props) {
   return (
     <div className="flex flex-col gap-2">
       <Progress value={progress.percentage} />

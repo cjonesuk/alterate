@@ -4,37 +4,23 @@ import { FormProvider } from "../../components/ui/form";
 import { useWorkflowEditor } from "./use-workflow-editor";
 import { WorkflowEditorPanel } from "./editor-panel";
 import { JobProgress } from "./job-progress";
-import { PreviewImage } from "./preview-image";
+import { LivePreviewImage } from "./preview-image";
 import { QueueManager } from "./queue-manager";
 import { useAlterateStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
-import { v4 as uuidv4 } from "uuid";
-
-const clientId = uuidv4();
 
 export function WorkflowEditorView() {
   const workflowEditor = useWorkflowEditor();
 
-  const imageUrl = useAlterateStore((store) => store.backend.liveImageUrl);
-  const progress = useAlterateStore((store) => store.backend.progress);
-
   const connected = useAlterateStore(
     (store) => store.backend.websocket !== null
   );
-  const connect = useAlterateStore((store) => store.connect);
-
-  const handleConnect = () => {
-    connect({
-      machineName: "localhost",
-      port: 8188,
-      clientId,
-    });
-  };
+  const connect = useAlterateStore((store) => store.connectToDefault);
 
   if (!connected) {
     return (
       <div>
-        <Button onClick={handleConnect}>Connect</Button>
+        <Button onClick={connect}>Connect</Button>
       </div>
     );
   }
@@ -47,9 +33,9 @@ export function WorkflowEditorView() {
         </div>
 
         <Sidebar>
-          <PreviewImage src={imageUrl} />
+          <LivePreviewImage />
 
-          <JobProgress progress={progress} />
+          <JobProgress />
 
           <QueueManager submit={workflowEditor.submit} />
         </Sidebar>

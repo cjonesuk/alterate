@@ -3,6 +3,7 @@ import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { NodeDefinitionMap, mapObjectInfo } from "@/lib/definition-mapping";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
+import { v4 as uuidv4 } from "uuid";
 
 export type ConnectionDetails = {
   machineName: string;
@@ -42,6 +43,7 @@ type State = {
 };
 
 type Actions = {
+  connectToDefault: () => void;
   connect: (details: ConnectionDetails) => void;
   updateLiveImage(imageBlob: Blob): void;
   updateProgress(promptId: string, step: number, steps: number): void;
@@ -92,12 +94,27 @@ const defaultBackendState: BackendState = {
   definitionns: null,
 };
 
+const clientId = uuidv4();
+
+const defaultComfyUiTarget = {
+  machineName: "localhost",
+  port: 8188,
+  clientId,
+};
+
 const alterateStore = create<Store>()(
   immer((set, get) => ({
     backend: defaultBackendState,
 
+    connectToDefault: () => {
+      get().connect(defaultComfyUiTarget);
+    },
+
     connect: (details: ConnectionDetails) => {
-      // todo: disconnect from existing websocket
+      const existingSocket = get().backend.websocket;
+      if (existingSocket) {
+        existingSocket.close();
+      }
 
       const url = formatWebsocketUrl(details);
       const ws = new WebSocket(url);

@@ -35,6 +35,7 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Display progress images via websocket
 - [x] Display progress bar via websocket
 - [x] Navigate to ComfyUI
+- [x] Use a central store (zustand)
 - [ ] Websocket reconnection handling
 - [ ] Display final output images
 - [ ] Show progress details (node stage)

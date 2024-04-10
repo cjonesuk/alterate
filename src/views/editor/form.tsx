@@ -38,3 +38,7 @@ export function useWorkflowEditorForm() {
 export type WorkflowEditorForm = ReturnType<
   typeof useWorkflowEditorForm
 >["form"];
+
+export type WorkflowEditorFormSubmit = ReturnType<
+  typeof useWorkflowEditorForm
+>["submit"];

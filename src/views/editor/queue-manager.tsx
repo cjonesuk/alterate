@@ -1,10 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { WorkflowEditorHook } from "./form";
+import { WorkflowEditorFormSubmit } from "./form";
 import { getComfyUiHttpUrl } from "@/lib/comfyui/api";
 import { useAlterateStore } from "@/lib/store";
 
 interface Props {
-  submit: WorkflowEditorHook["submit"];
+  submit: WorkflowEditorFormSubmit;
 }
 
 export function QueueManager({ submit }: Props) {

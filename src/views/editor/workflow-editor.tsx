@@ -48,9 +48,7 @@ export function WorkflowEditorView() {
 
         <Sidebar>
           <LivePreviewImage />
-
           <JobProgress />
-
           <QueueManager submit={submit} />
         </Sidebar>
       </div>

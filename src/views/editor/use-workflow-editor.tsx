@@ -4,13 +4,11 @@ import {
   InputTypes,
   NodeDefinition,
   NodeDefinitionMap,
-  useNodeDefinitions,
 } from "../../comfyui/useObjectInfo";
 import { WorkflowDocument, WorkflowNode } from "../../comfyui/types/workflow";
 import { useMemo } from "react";
 import { useForm } from "react-hook-form";
-
-import { queueWorkflow } from "../../comfyui/api";
+import { useAlterateStore } from "@/lib/store";
 
 export type WorkflowNodeValueKey = [string, string];
 
@@ -103,8 +101,10 @@ function makeEditors(
 }
 
 export function useWorkflowEditor() {
-  const { definitions, error, isLoading } = useNodeDefinitions();
+  const definitions = useAlterateStore((store) => store.backend.definitionns);
+
   const form = useForm();
+  const sendPrompt = useAlterateStore((store) => store.sendPrompt);
 
   const workflow = useMemo(
     () =>
@@ -113,12 +113,12 @@ export function useWorkflowEditor() {
   );
 
   const editors = useMemo(() => {
-    if (isLoading || !definitions || error) {
+    if (!definitions) {
       return null;
     }
 
     return makeEditors(workflow, definitions);
-  }, [isLoading, error, definitions, workflow]);
+  }, [definitions, workflow]);
 
   const submit = form.handleSubmit(async (formData) => {
     // TODO: use Immer
@@ -138,11 +138,11 @@ export function useWorkflowEditor() {
       });
     });
 
-    const id = await queueWorkflow(workflowCopy);
+    const id = await sendPrompt(workflowCopy);
     console.log("Job Queued:", id);
   });
 
-  return { isLoading, error, definitions, editors, form, submit };
+  return { definitions, editors, form, submit };
 }
 
 export type WorkflowEditorHook = ReturnType<typeof useWorkflowEditor>;

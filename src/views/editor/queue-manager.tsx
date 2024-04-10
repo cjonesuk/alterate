@@ -1,15 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { WorkflowEditorHook } from "./use-workflow-editor";
-import { QueueSummary } from "@/comfyui/useStatus";
 import { getHttpUrl } from "@/comfyui/api";
+import { useAlterateStore } from "@/lib/store";
 
 interface Props {
   submit: WorkflowEditorHook["submit"];
-  queue: QueueSummary;
 }
 
-export function QueueManager({ submit, queue }: Props) {
+export function QueueManager({ submit }: Props) {
+  const queue = useAlterateStore((store) => store.backend.queue);
+
+  // todo: move to store
   const comfyuiUrl = getHttpUrl();
+
   return (
     <div className="flex flex-col gap-2">
       <p>Jobs: {`${queue.length}`}</p>

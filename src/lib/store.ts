@@ -1,0 +1,279 @@
+import { WebsocketMessage } from "@/comfyui/types/websocket";
+import {
+  NodeDefinitionMap,
+  fetchAndMapObjectInfo,
+} from "@/comfyui/useObjectInfo";
+import { create } from "zustand";
+import { immer } from "zustand/middleware/immer";
+
+type ConnectionDetails = {
+  machineName: string;
+  port: number;
+  clientId: string;
+};
+
+export interface ProgressSummary {
+  promptId: string | null;
+  step: number;
+  steps: number;
+  ratio: number;
+  percentage: number;
+}
+
+export interface ExecutionSummary {
+  promptId: string;
+  nodeId: string;
+}
+
+export interface QueueSummary {
+  length: number;
+}
+
+type BackendState = {
+  connection: ConnectionDetails | null;
+  websocket: WebSocket | null;
+  queue: QueueSummary;
+  progress: ProgressSummary;
+  execution: ExecutionSummary;
+  liveImageUrl: string | null;
+  definitionns: NodeDefinitionMap | null;
+};
+
+type State = {
+  backend: BackendState;
+};
+
+type Actions = {
+  connect: (details: ConnectionDetails) => void;
+  updateLiveImage(imageBlob: Blob): void;
+  updateProgress(promptId: string, step: number, steps: number): void;
+  updateQueueLength(input: number): void;
+  sendPrompt(workflow: unknown): Promise<string>;
+  refreshDefinitions(): Promise<void>;
+};
+
+type Store = State & Actions;
+
+function formatWebsocketUrl({
+  machineName,
+  port,
+  clientId,
+}: ConnectionDetails): string {
+  return `ws://${machineName}:${port}/ws?clientId=${clientId}`;
+}
+
+function formatHttpUrl(
+  { machineName, port }: ConnectionDetails,
+  endpoint?: string
+): string {
+  if (endpoint) {
+    return `http://${machineName}:${port}/${endpoint}`;
+  }
+
+  return `http://${machineName}:${port}`;
+}
+
+const defaultBackendState: BackendState = {
+  connection: null,
+  websocket: null,
+  queue: {
+    length: 0,
+  },
+  progress: {
+    promptId: null,
+    step: 0,
+    steps: 0,
+    ratio: 0,
+    percentage: 0,
+  },
+  execution: {
+    promptId: "",
+    nodeId: "",
+  },
+  liveImageUrl: null,
+  definitionns: null,
+};
+
+const alterateStore = create<Store>()(
+  immer((set, get) => ({
+    backend: defaultBackendState,
+
+    connect: (details: ConnectionDetails) => {
+      // todo: disconnect from existing websocket
+
+      const url = formatWebsocketUrl(details);
+      const ws = new WebSocket(url);
+      ws.binaryType = "arraybuffer";
+
+      ws.onopen = () => {
+        console.log("Connected to ComfyUI websocket");
+
+        get()
+          .refreshDefinitions()
+          .then(() => {
+            console.log("Definitions refreshed");
+          });
+      };
+
+      ws.onclose = () => {
+        console.log("Disconnected from ComfyUI websocket");
+
+        // TODO: reconnect
+      };
+
+      ws.onmessage = (event) => {
+        console.log("Received message from ComfyUI websocket", event.data);
+
+        const data = event.data;
+
+        if (data instanceof ArrayBuffer) {
+          const view = new DataView(event.data);
+          const eventType = view.getUint32(0);
+          const buffer = event.data.slice(4);
+          if (eventType === 1) {
+            const view2 = new DataView(event.data);
+            const imageType = view2.getUint32(0);
+            let imageMime;
+            switch (imageType) {
+              case 1:
+              default:
+                imageMime = "image/jpeg";
+                break;
+              case 2:
+                imageMime = "image/png";
+            }
+            const imageBlob = new Blob([buffer.slice(4)], { type: imageMime });
+
+            get().updateLiveImage(imageBlob);
+          } else {
+            console.error(
+              "Unknown binary websocket message of type",
+              eventType
+            );
+          }
+
+          return;
+        }
+
+        if (typeof data === "string") {
+          console.log("Received string message from ComfyUI websocket", data);
+          const message = JSON.parse(data as string) as WebsocketMessage;
+
+          if (message.type === "progress") {
+            get().updateProgress(
+              message.data.prompt_id,
+              message.data.value,
+              message.data.max
+            );
+            return;
+          }
+
+          if (message.type === "status") {
+            get().updateQueueLength(
+              message.data.status.exec_info.queue_remaining
+            );
+            return;
+          }
+
+          if (message.type === "execution_cached") {
+            console.log("Execution cached", message.data.nodes);
+            return;
+          }
+
+          if (message.type === "execution_started") {
+            console.log("Execution started", message.data.prompt_id);
+            return;
+          }
+
+          if (message.type === "executing") {
+            console.log("Executing node", message.data.node);
+
+            if (message.data.node === null) {
+              console.log("Execution complete");
+            }
+
+            return;
+          }
+
+          if (message.type === "executed") {
+            console.log("Executed node", message.data.node);
+            return;
+          }
+
+          console.error("Unknown websocket message", message);
+        }
+      };
+
+      set((state) => {
+        state.backend.connection = details;
+        state.backend.websocket = ws;
+      });
+    },
+
+    updateProgress: (promptId: string, step: number, steps: number) => {
+      set((state) => {
+        const ratio = steps > 0 ? step / steps : 0;
+        state.backend.progress = {
+          promptId,
+          step,
+          steps,
+          ratio,
+          percentage: steps > 0 ? ratio * 100 : 0,
+        };
+      });
+    },
+
+    updateQueueLength: (input: number) => {
+      set((state) => {
+        state.backend.queue.length = input;
+      });
+    },
+
+    updateLiveImage: (imageBlob: Blob) => {
+      set((state) => {
+        const oldUrl = state.backend.liveImageUrl;
+        if (oldUrl) {
+          URL.revokeObjectURL(oldUrl);
+        }
+
+        state.backend.liveImageUrl = URL.createObjectURL(imageBlob);
+      });
+    },
+
+    sendPrompt: async (workflow: unknown) => {
+      const connection = get().backend.connection;
+
+      if (connection === null) {
+        console.error("No connection details available");
+        return;
+      }
+
+      const url = formatHttpUrl(connection, "prompt");
+      const payload = JSON.stringify({
+        prompt: workflow,
+        client_id: connection.clientId,
+      });
+
+      const res = await fetch(url, {
+        method: "POST",
+        body: payload,
+      });
+
+      const resp = await res.json();
+
+      return resp.prompt_id;
+    },
+
+    refreshDefinitions: async () => {
+      const definitions = await fetchAndMapObjectInfo();
+
+      set((state) => {
+        state.backend.definitionns = definitions;
+      });
+    },
+  }))
+);
+
+const useAlterateStore = alterateStore;
+
+export { alterateStore, useAlterateStore };

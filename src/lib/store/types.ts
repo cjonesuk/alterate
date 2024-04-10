@@ -51,6 +51,7 @@ type BackendActions = {
   updateQueueLength(input: number): void;
   sendPrompt(workflow: unknown): Promise<string>;
   refreshDefinitions(): Promise<void>;
+  promptCompleted(promptId: string): Promise<void>;
 };
 
 export type BackendPart = BackendActions & {

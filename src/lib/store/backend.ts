@@ -1,4 +1,4 @@
-import { fetchObjectInfo } from "@/lib/comfyui/api";
+import { fetchPromptResult, fetchObjectInfo } from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
 
@@ -160,7 +160,7 @@ export const createBackendPart: ImmerStateCreator<
           console.log("Executing node", message.data.node);
 
           if (message.data.node === null) {
-            console.log("Execution complete");
+            get().promptCompleted(message.data.prompt_id);
           }
 
           return;
@@ -248,5 +248,19 @@ export const createBackendPart: ImmerStateCreator<
     set((state) => {
       state.backend.definitions = definitions;
     });
+  },
+
+  promptCompleted: async (promptId: string) => {
+    console.log("Prompt completed", promptId);
+
+    const connection = get().backend.connection;
+
+    if (!connection) {
+      console.error("No connection details available");
+      return;
+    }
+
+    const result = await fetchPromptResult(connection, promptId);
+    console.log("Prompt result", result);
   },
 });

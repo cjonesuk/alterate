@@ -102,9 +102,9 @@ function makeEditors(
 
 export function useWorkflowEditor() {
   const definitions = useAlterateStore((store) => store.backend.definitionns);
+  const sendPrompt = useAlterateStore((store) => store.sendPrompt);
 
   const form = useForm();
-  const sendPrompt = useAlterateStore((store) => store.sendPrompt);
 
   const workflow = useMemo(
     () =>

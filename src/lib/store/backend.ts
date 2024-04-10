@@ -8,7 +8,7 @@ import {
   ImmerStateCreator,
   BackendPart,
   BackendState,
-  State,
+  AlterateState,
 } from "./types";
 
 function formatWebsocketUrl({
@@ -59,10 +59,10 @@ const defaultComfyUiTarget = {
   clientId,
 };
 
-export const createBackendPart: ImmerStateCreator<State, BackendPart> = (
-  set,
-  get
-) => ({
+export const createBackendPart: ImmerStateCreator<
+  AlterateState,
+  BackendPart
+> = (set, get) => ({
   backend: defaultBackendState,
 
   connectToDefault: () => {

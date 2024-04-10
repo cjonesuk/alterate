@@ -1,5 +1,7 @@
 import { StateCreator } from "zustand";
 import { NodeDefinitionMap } from "../definition-mapping";
+import { WorkflowDocument } from "../comfyui/workflow";
+import { WorkflowEditorNode } from "../editor-mapping";
 
 export type ImmerStateCreator<T, TPart> = StateCreator<
   T,
@@ -55,8 +57,21 @@ export type BackendPart = BackendActions & {
   backend: BackendState;
 };
 
-export type State = BackendPart;
+export type WorkspaceDefinition = {
+  workflow: WorkflowDocument | null;
+  editors: WorkflowEditorNode[] | null;
+};
 
-export type Actions = BackendActions;
+export type WorkspaceState = {};
 
-export type Store = State & Actions;
+type WorkspaceActions = {
+  loadWorkspace(definition: WorkspaceDefinition): Promise<void>;
+};
+
+export type WorkspacePart = WorkspaceActions & {
+  workspace: WorkspaceState;
+};
+
+export type AlterateState = BackendPart & WorkspacePart;
+
+export type AlterateStore = AlterateState;

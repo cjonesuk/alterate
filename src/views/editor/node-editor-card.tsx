@@ -13,7 +13,7 @@ import {
   WorkflowEditorForm,
   WorkflowEditorNode,
   WorkflowEditorNodeInput,
-} from "./use-workflow-editor";
+} from "./form";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import {
   BooleanFormField,
@@ -44,7 +44,7 @@ export const NodeEditorCard: React.FC<Props> = ({ editor, form }) => {
 
 function mapComponent(
   form: UseFormReturn<FieldValues, unknown, undefined>,
-  input: WorkflowEditorNodeInput,
+  input: WorkflowEditorNodeInput
 ) {
   const { definition } = input;
   const key = input.fieldId;

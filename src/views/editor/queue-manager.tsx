@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { WorkflowEditorHook } from "./use-workflow-editor";
+import { WorkflowEditorHook } from "./form";
 import { getComfyUiHttpUrl } from "@/lib/comfyui/api";
 import { useAlterateStore } from "@/lib/store";
 

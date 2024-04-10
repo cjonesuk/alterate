@@ -1,7 +1,7 @@
 import { Sidebar } from "../../components/layout/sidebar";
 import { FormProvider } from "../../components/ui/form";
 
-import { useWorkflowEditor } from "./use-workflow-editor";
+import { useWorkflowEditorForm } from "./form";
 import { WorkflowEditorPanel } from "./editor-panel";
 import { JobProgress } from "./job-progress";
 import { LivePreviewImage } from "./preview-image";
@@ -10,17 +10,18 @@ import { useAlterateStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 
 export function WorkflowEditorView() {
-  const workflowEditor = useWorkflowEditor();
-
   const connected = useAlterateStore(
     (store) => store.backend.websocket !== null
   );
-  const connect = useAlterateStore((store) => store.connectToDefault);
 
-  const loadWorkspace = useAlterateStore((store) => store.loadDefaultWorkspace);
   const workspaceDefinition = useAlterateStore(
     (store) => store.workspace.definition
   );
+
+  const connect = useAlterateStore((store) => store.connectToDefault);
+  const loadWorkspace = useAlterateStore((store) => store.loadDefaultWorkspace);
+
+  const { form, submit } = useWorkflowEditorForm();
 
   if (!connected) {
     return (
@@ -39,10 +40,10 @@ export function WorkflowEditorView() {
   }
 
   return (
-    <FormProvider {...workflowEditor.form}>
+    <FormProvider {...form}>
       <div className="w-full flex flex-row items-start p-4">
         <div className="flex-grow">
-          <WorkflowEditorPanel {...workflowEditor} />
+          <WorkflowEditorPanel form={form} />
         </div>
 
         <Sidebar>
@@ -50,7 +51,7 @@ export function WorkflowEditorView() {
 
           <JobProgress />
 
-          <QueueManager submit={workflowEditor.submit} />
+          <QueueManager submit={submit} />
         </Sidebar>
       </div>
     </FormProvider>

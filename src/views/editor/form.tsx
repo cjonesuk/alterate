@@ -2,13 +2,11 @@ import { WorkflowDocument } from "../../lib/comfyui/workflow";
 import { useForm } from "react-hook-form";
 import { useAlterateStore } from "@/lib/store";
 
-export function useWorkflowEditor() {
-  const definitions = useAlterateStore((store) => store.backend.definitions);
+export function useWorkflowEditorForm() {
   const sendPrompt = useAlterateStore((store) => store.sendPrompt);
   const workspaceDefinition = useAlterateStore(
     (store) => store.workspace.definition
   );
-  const editors = useAlterateStore((store) => store.workspace.editors);
 
   const form = useForm();
 
@@ -34,9 +32,9 @@ export function useWorkflowEditor() {
     console.log("Job Queued:", id);
   });
 
-  return { definitions, editors, form, submit };
+  return { form, submit };
 }
 
-export type WorkflowEditorHook = ReturnType<typeof useWorkflowEditor>;
-
-export type WorkflowEditorForm = ReturnType<typeof useWorkflowEditor>["form"];
+export type WorkflowEditorForm = ReturnType<
+  typeof useWorkflowEditorForm
+>["form"];

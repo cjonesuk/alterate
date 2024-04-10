@@ -40,7 +40,7 @@ export type BackendState = {
   progress: ProgressSummary;
   execution: ExecutionSummary;
   liveImageUrl: string | null;
-  definitionns: NodeDefinitionMap | null;
+  definitions: NodeDefinitionMap | null;
 };
 
 type BackendActions = {
@@ -58,13 +58,16 @@ export type BackendPart = BackendActions & {
 };
 
 export type WorkspaceDefinition = {
-  workflow: WorkflowDocument | null;
+  workflow: WorkflowDocument;
+};
+
+export type WorkspaceState = {
+  definition: WorkspaceDefinition | null;
   editors: WorkflowEditorNode[] | null;
 };
 
-export type WorkspaceState = {};
-
 type WorkspaceActions = {
+  loadDefaultWorkspace(): Promise<void>;
   loadWorkspace(definition: WorkspaceDefinition): Promise<void>;
 };
 

@@ -13,7 +13,7 @@ const alterateStore = create<AlterateStore>()(
       ...backendPart,
       ...workspacePart,
     };
-  }),
+  })
 );
 
 const useAlterateStore = alterateStore;

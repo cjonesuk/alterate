@@ -21,7 +21,7 @@ function formatWebsocketUrl({
 
 function formatHttpUrl(
   { machineName, port }: ConnectionDetails,
-  endpoint?: string,
+  endpoint?: string
 ): string {
   if (endpoint) {
     return `http://${machineName}:${port}/${endpoint}`;
@@ -48,7 +48,7 @@ const defaultBackendState: BackendState = {
     nodeId: "",
   },
   liveImageUrl: null,
-  definitionns: null,
+  definitions: null,
 };
 
 const clientId = uuidv4();
@@ -134,14 +134,14 @@ export const createBackendPart: ImmerStateCreator<
           get().updateProgress(
             message.data.prompt_id,
             message.data.value,
-            message.data.max,
+            message.data.max
           );
           return;
         }
 
         if (message.type === "status") {
           get().updateQueueLength(
-            message.data.status.exec_info.queue_remaining,
+            message.data.status.exec_info.queue_remaining
           );
           return;
         }
@@ -246,7 +246,7 @@ export const createBackendPart: ImmerStateCreator<
     const definitions = mapObjectInfo(objectInfo);
 
     set((state) => {
-      state.backend.definitionns = definitions;
+      state.backend.definitions = definitions;
     });
   },
 });

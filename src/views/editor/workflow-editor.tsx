@@ -13,14 +13,27 @@ export function WorkflowEditorView() {
   const workflowEditor = useWorkflowEditor();
 
   const connected = useAlterateStore(
-    (store) => store.backend.websocket !== null,
+    (store) => store.backend.websocket !== null
   );
   const connect = useAlterateStore((store) => store.connectToDefault);
+
+  const loadWorkspace = useAlterateStore((store) => store.loadDefaultWorkspace);
+  const workspaceDefinition = useAlterateStore(
+    (store) => store.workspace.definition
+  );
 
   if (!connected) {
     return (
       <div>
         <Button onClick={connect}>Connect</Button>
+      </div>
+    );
+  }
+
+  if (!workspaceDefinition) {
+    return (
+      <div>
+        <Button onClick={loadWorkspace}>Load Workflow</Button>
       </div>
     );
   }

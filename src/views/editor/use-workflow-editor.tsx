@@ -1,35 +1,21 @@
-import original_workflow_data from "../../assets/workflow_api.json";
-
 import { WorkflowDocument } from "../../lib/comfyui/workflow";
-import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useAlterateStore } from "@/lib/store";
-import { makeEditors } from "@/lib/editor-mapping";
 
 export function useWorkflowEditor() {
-  const definitions = useAlterateStore((store) => store.backend.definitionns);
+  const definitions = useAlterateStore((store) => store.backend.definitions);
   const sendPrompt = useAlterateStore((store) => store.sendPrompt);
+  const workspaceDefinition = useAlterateStore(
+    (store) => store.workspace.definition
+  );
+  const editors = useAlterateStore((store) => store.workspace.editors);
 
   const form = useForm();
-
-  const workflow = useMemo(
-    () =>
-      JSON.parse(JSON.stringify(original_workflow_data)) as WorkflowDocument,
-    [],
-  );
-
-  const editors = useMemo(() => {
-    if (!definitions) {
-      return null;
-    }
-
-    return makeEditors(workflow, definitions);
-  }, [definitions, workflow]);
 
   const submit = form.handleSubmit(async (formData) => {
     // TODO: use Immer
     const workflowCopy = JSON.parse(
-      JSON.stringify(workflow),
+      JSON.stringify(workspaceDefinition?.workflow) // todo: fix
     ) as WorkflowDocument;
 
     const formNodeIds = Object.keys(formData);

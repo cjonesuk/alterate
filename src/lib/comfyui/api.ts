@@ -2,7 +2,7 @@ import { ComfyUITarget } from "./connection";
 
 export function getComfyUiHttpUrl(
   { machineName, port }: ComfyUITarget,
-  endpoint?: string
+  endpoint?: string,
 ) {
   if (endpoint) {
     return `http://${machineName}:${port}/${endpoint}`;

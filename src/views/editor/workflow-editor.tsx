@@ -13,7 +13,7 @@ export function WorkflowEditorView() {
   const workflowEditor = useWorkflowEditor();
 
   const connected = useAlterateStore(
-    (store) => store.backend.websocket !== null
+    (store) => store.backend.websocket !== null,
   );
   const connect = useAlterateStore((store) => store.connectToDefault);
 

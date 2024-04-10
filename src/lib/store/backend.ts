@@ -21,7 +21,7 @@ function formatWebsocketUrl({
 
 function formatHttpUrl(
   { machineName, port }: ConnectionDetails,
-  endpoint?: string
+  endpoint?: string,
 ): string {
   if (endpoint) {
     return `http://${machineName}:${port}/${endpoint}`;
@@ -134,14 +134,14 @@ export const createBackendPart: ImmerStateCreator<
           get().updateProgress(
             message.data.prompt_id,
             message.data.value,
-            message.data.max
+            message.data.max,
           );
           return;
         }
 
         if (message.type === "status") {
           get().updateQueueLength(
-            message.data.status.exec_info.queue_remaining
+            message.data.status.exec_info.queue_remaining,
           );
           return;
         }

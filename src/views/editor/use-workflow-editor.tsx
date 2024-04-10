@@ -15,7 +15,7 @@ export function useWorkflowEditor() {
   const workflow = useMemo(
     () =>
       JSON.parse(JSON.stringify(original_workflow_data)) as WorkflowDocument,
-    []
+    [],
   );
 
   const editors = useMemo(() => {
@@ -29,7 +29,7 @@ export function useWorkflowEditor() {
   const submit = form.handleSubmit(async (formData) => {
     // TODO: use Immer
     const workflowCopy = JSON.parse(
-      JSON.stringify(workflow)
+      JSON.stringify(workflow),
     ) as WorkflowDocument;
 
     const formNodeIds = Object.keys(formData);

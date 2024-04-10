@@ -73,7 +73,7 @@ export type NodeDefinition = {
 
 function mapInput(
   inputName: string,
-  inputDef: InputDefinition
+  inputDef: InputDefinition,
 ): AnyInputType | undefined {
   if (inputDef instanceof Array) {
     const [type, ...rest] = inputDef;
@@ -143,7 +143,7 @@ function mapInput(
 }
 
 function mapRequiredInputs(
-  required: Input["required"] | undefined
+  required: Input["required"] | undefined,
 ): AnyInputType[] {
   if (!required) {
     return [];
@@ -162,7 +162,7 @@ function mapRequiredInputs(
 
 function mapNode(
   classType: string,
-  entry: ObjectNode
+  entry: ObjectNode,
 ): NodeDefinition | undefined {
   const requiredInputs = mapRequiredInputs(entry.input.required);
 
@@ -188,6 +188,6 @@ export function mapObjectInfo(root: ObjectInfoRoot): NodeDefinitionMap {
     .filter(Boolean) as NodeDefinition[];
 
   return new Map<string, NodeDefinition>(
-    nodeDefinitions.map((x) => [x?.class_type, x])
+    nodeDefinitions.map((x) => [x?.class_type, x]),
   );
 }

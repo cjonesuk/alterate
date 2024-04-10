@@ -27,7 +27,7 @@ export interface WorkflowEditorNode {
 function makeInputEditor(
   nodeId: string,
   node: WorkflowNode,
-  definition: AnyInputType
+  definition: AnyInputType,
 ): WorkflowEditorNodeInput {
   const key: WorkflowNodeValueKey = [nodeId, definition.name];
   const nodeValue = node.inputs[definition.name];
@@ -52,7 +52,7 @@ function makeInputEditor(
 function makeNodeEditor(
   workflow: WorkflowDocument,
   definitions: NodeDefinitionMap,
-  nodeId: string
+  nodeId: string,
 ): WorkflowEditorNode | null {
   const node = workflow[nodeId];
 
@@ -64,7 +64,7 @@ function makeNodeEditor(
   }
 
   const inputDefinitions = definition.inputs.filter(
-    (x) => x.type !== InputTypes.IGNORED
+    (x) => x.type !== InputTypes.IGNORED,
   );
 
   if (inputDefinitions.length === 0) {
@@ -85,12 +85,12 @@ function makeNodeEditor(
 
 export function makeEditors(
   workflow: WorkflowDocument,
-  definitions: NodeDefinitionMap
+  definitions: NodeDefinitionMap,
 ): WorkflowEditorNode[] {
   const nodeIds = Object.keys(workflow);
 
   const editors = nodeIds.map((nodeId: string) =>
-    makeNodeEditor(workflow, definitions, nodeId)
+    makeNodeEditor(workflow, definitions, nodeId),
   );
 
   return editors.filter(Boolean) as WorkflowEditorNode[];

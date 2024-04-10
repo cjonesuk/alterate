@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react";
 
 export interface ProgressSummary {
+  promptId: string | null;
+
   step: number;
   steps: number;
   ratio: number;
@@ -17,12 +19,19 @@ export interface StatusSummary {
 }
 
 type StatusHook = StatusSummary & {
-  updateProgress: (current: number, total: number) => void;
+  updateProgress: (
+    promptId: string,
+
+    current: number,
+    total: number
+  ) => void;
   updateQueueLength: (input: number) => void;
 };
 
 export function useStatus(): StatusHook {
   const [progress, setProgress] = useState<ProgressSummary>({
+    promptId: null,
+
     step: 0,
     steps: 0,
     ratio: 0,
@@ -33,10 +42,11 @@ export function useStatus(): StatusHook {
   });
 
   const updateProgress = useCallback(
-    (current: number, total: number) => {
+    (promptId: string, current: number, total: number) => {
       const ratio = current / total;
 
       setProgress({
+        promptId,
         step: current,
         steps: total,
         ratio: total > 0 ? ratio : 0,

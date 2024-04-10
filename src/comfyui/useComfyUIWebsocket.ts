@@ -1,85 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getWsUrl } from "./api";
 import { useStatus } from "./useStatus";
-
-function useLiveImage() {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  const updateImage = useCallback(
-    (blob: Blob) => {
-      setImageUrl((oldUrl) => {
-        if (oldUrl) {
-          URL.revokeObjectURL(oldUrl);
-        }
-
-        return URL.createObjectURL(blob);
-      });
-    },
-    [setImageUrl]
-  );
-
-  return { imageUrl, updateImage };
-}
-
-interface ProgressMessage {
-  type: "progress";
-  data: {
-    value: number;
-    max: number;
-    prompt_id: string;
-  };
-}
-
-interface StatusMessage {
-  type: "status";
-  data: {
-    status: {
-      exec_info: {
-        queue_remaining: number;
-      };
-    };
-  };
-}
-
-interface ExecutionStartedMessage {
-  type: "execution_started";
-  data: {
-    prompt_id: string;
-  };
-}
-
-interface ExecutingMessage {
-  type: "executing";
-  data: {
-    node: string;
-    prompt_id: string;
-  };
-}
-
-interface ExecutedMessage {
-  type: "executed";
-  data: {
-    node: string | null;
-    prompt_id: string;
-  };
-}
-
-interface ExecutionCachedMessage {
-  type: "execution_cached";
-  data: {
-    nodes: string[];
-    prompt_id: string;
-  };
-}
-
-type WebsocketMessage =
-  | ProgressMessage
-  | StatusMessage
-  | ExecutionStartedMessage
-  | ExecutingMessage
-  | ExecutedMessage
-  | ExecutionCachedMessage;
+import { useLiveImage } from "./useLiveImage";
+import { WebsocketMessage } from "./types/websocket";
 
 export function useComfyUIWebsocket() {
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -137,7 +61,11 @@ export function useComfyUIWebsocket() {
         const message = JSON.parse(data as string) as WebsocketMessage;
 
         if (message.type === "progress") {
-          updateProgress(message.data.value, message.data.max);
+          updateProgress(
+            message.data.prompt_id,
+            message.data.value,
+            message.data.max
+          );
           return;
         }
 
@@ -158,6 +86,11 @@ export function useComfyUIWebsocket() {
 
         if (message.type === "executing") {
           console.log("Executing node", message.data.node);
+
+          if (message.data.node === null) {
+            console.log("Execution complete");
+          }
+
           return;
         }
 
@@ -176,6 +109,10 @@ export function useComfyUIWebsocket() {
       ws.close();
     };
   }, [updateImage, updateProgress, updateQueueLength]);
+
+  useEffect(() => {
+    console.log("Polling for history");
+  }, []);
 
   return {
     socket,

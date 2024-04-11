@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useAlterateStore } from "@/lib/store";
 
 export function useWorkflowEditorForm() {
-  const sendPrompt = useAlterateStore((store) => store.sendPrompt);
+  const startJob = useAlterateStore((store) => store.startJob);
   const workspaceDefinition = useAlterateStore(
     (store) => store.workspace.definition
   );
@@ -28,7 +28,7 @@ export function useWorkflowEditorForm() {
       });
     });
 
-    const id = await sendPrompt(workflowCopy);
+    const id = await startJob(workflowCopy);
     console.log("Job Queued:", id);
   });
 

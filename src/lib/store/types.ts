@@ -2,6 +2,7 @@ import { StateCreator } from "zustand";
 import { NodeDefinitionMap } from "../definition-mapping";
 import { WorkflowDocument } from "../comfyui/workflow";
 import { WorkflowEditorNode } from "../editor-mapping";
+import { HistoryPromptResult } from "../comfyui/history";
 
 export type ImmerStateCreator<T, TPart> = StateCreator<
   T,
@@ -65,11 +66,14 @@ export type WorkspaceDefinition = {
 export type WorkspaceState = {
   definition: WorkspaceDefinition | null;
   editors: WorkflowEditorNode[] | null;
+  promptId: string | null;
 };
 
 type WorkspaceActions = {
   loadDefaultWorkspace(): Promise<void>;
   loadWorkspace(definition: WorkspaceDefinition): Promise<void>;
+  startJob(workflow: WorkflowDocument): Promise<void>;
+  notifyPromptCompleted(result: HistoryPromptResult): void;
 };
 
 export type WorkspacePart = WorkspaceActions & {

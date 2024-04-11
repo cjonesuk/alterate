@@ -7,6 +7,7 @@ import { WorkflowDocument } from "../comfyui/workflow";
 const defaultWorkspaceState = {
   definition: null,
   editors: null,
+  promptId: null,
 };
 
 export const createWorkspacePart: ImmerStateCreator<
@@ -39,6 +40,32 @@ export const createWorkspacePart: ImmerStateCreator<
         definition.workflow,
         nodeDefinitions
       );
+    });
+  },
+
+  async startJob(workflow) {
+    console.log("Starting job", workflow);
+
+    const promptId = await get().sendPrompt(workflow);
+
+    set((draft) => {
+      draft.workspace.promptId = promptId;
+    });
+  },
+
+  notifyPromptCompleted(result) {
+    const promptId = get().workspace.promptId;
+
+    const completedPromptId = result.prompt[1];
+
+    if (promptId !== completedPromptId) {
+      console.error("Prompt ID does not match, ignoring...");
+      return;
+    }
+
+    console.log("Prompt completed", promptId, result);
+    set((draft) => {
+      draft.workspace.promptId = null;
     });
   },
 });

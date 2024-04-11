@@ -8,6 +8,7 @@ const defaultWorkspaceState = {
   definition: null,
   editors: null,
   promptId: null,
+  outputImages: [],
 };
 
 export const createWorkspacePart: ImmerStateCreator<
@@ -44,7 +45,7 @@ export const createWorkspacePart: ImmerStateCreator<
   },
 
   async startJob(workflow) {
-    console.log("Starting job", workflow);
+    console.log("Starting job");
 
     const promptId = await get().sendPrompt(workflow);
 
@@ -54,18 +55,28 @@ export const createWorkspacePart: ImmerStateCreator<
   },
 
   notifyPromptCompleted(result) {
-    const promptId = get().workspace.promptId;
-
-    const completedPromptId = result.prompt[1];
-
-    if (promptId !== completedPromptId) {
-      console.error("Prompt ID does not match, ignoring...");
-      return;
-    }
-
-    console.log("Prompt completed", promptId, result);
     set((draft) => {
+      const promptId = draft.workspace.promptId;
+
+      const completedPromptId = result.prompt[1];
+
+      if (promptId !== completedPromptId) {
+        console.error("Prompt ID does not match, ignoring...");
+        return;
+      }
+
+      console.log("Prompt completed", promptId, result);
+
       draft.workspace.promptId = null;
+
+      const images = Object.entries(result.outputs).flatMap((output) => {
+        const nodeOutput = output[1];
+
+        const images = nodeOutput.images?.map((image) => image) || [];
+        return images;
+      });
+
+      draft.workspace.outputImages = images;
     });
   },
 });

@@ -67,6 +67,11 @@ export type WorkspaceState = {
   definition: WorkspaceDefinition | null;
   editors: WorkflowEditorNode[] | null;
   promptId: string | null;
+  outputImages: {
+    filename: string;
+    subfolder: string;
+    type: "output" | "temp";
+  }[];
 };
 
 type WorkspaceActions = {

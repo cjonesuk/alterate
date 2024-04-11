@@ -18,6 +18,10 @@ export function WorkflowEditorView() {
     (store) => store.workspace.definition
   );
 
+  const outputImages = useAlterateStore(
+    (store) => store.workspace.outputImages
+  );
+
   const connect = useAlterateStore((store) => store.connectToDefault);
   const loadWorkspace = useAlterateStore((store) => store.loadDefaultWorkspace);
 
@@ -39,12 +43,22 @@ export function WorkflowEditorView() {
     );
   }
 
+  const images = outputImages.map((image) => {
+    const filename = image.filename;
+
+    const url = `http://localhost:8188/view?filename=${filename}&subfolder=${image.subfolder}&type=${image.type}`;
+
+    return <img key={url} src={url} alt={filename} />;
+  });
+
   return (
     <FormProvider {...form}>
       <div className="w-full flex flex-row items-start p-4">
         <div className="flex-grow">
           <WorkflowEditorPanel form={form} />
         </div>
+
+        <div>{images}</div>
 
         <Sidebar>
           <LivePreviewImage />

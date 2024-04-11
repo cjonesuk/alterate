@@ -1,4 +1,5 @@
 import { ComfyUITarget } from "./connection";
+import { HistoryResult } from "./history";
 import { ObjectInfoRoot } from "./node-definitions";
 
 export function getComfyUiHttpUrl(
@@ -30,5 +31,7 @@ export async function fetchPromptResult(
   const url = getComfyUiHttpUrl(target, `history/${promptId}`);
 
   const res = await fetch(url);
-  return await res.json();
+  const root = await res.json();
+
+  return root as HistoryResult;
 }

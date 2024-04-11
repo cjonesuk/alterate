@@ -261,6 +261,6 @@ export const createBackendPart: ImmerStateCreator<
     }
 
     const result = await fetchPromptResult(connection, promptId);
-    console.log("Prompt result", result);
+    console.log("Prompt result", result[promptId]);
   },
 });

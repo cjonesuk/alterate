@@ -3,6 +3,7 @@ import { NodeDefinitionMap } from "../definition-mapping";
 import { WorkflowDocument } from "../comfyui/workflow";
 import { WorkflowEditorNode } from "../editor-mapping";
 import { HistoryPromptResult } from "../comfyui/history";
+import { ImageReference } from "../comfyui/images";
 
 export type ImmerStateCreator<T, TPart> = StateCreator<
   T,
@@ -50,9 +51,10 @@ type BackendActions = {
   updateLiveImage(imageBlob: Blob): void;
   updateProgress(promptId: string, step: number, steps: number): void;
   updateQueueLength(input: number): void;
-  sendPrompt(workflow: unknown): Promise<string>;
+  sendPrompt(workflow: WorkflowDocument): Promise<string | null>;
   refreshDefinitions(): Promise<void>;
   promptCompleted(promptId: string): Promise<void>;
+  acceptImage(reference: ImageReference): Promise<void>;
 };
 
 export type BackendPart = BackendActions & {
@@ -67,11 +69,7 @@ export type WorkspaceState = {
   definition: WorkspaceDefinition | null;
   editors: WorkflowEditorNode[] | null;
   promptId: string | null;
-  outputImages: {
-    filename: string;
-    subfolder: string;
-    type: "output" | "temp";
-  }[];
+  outputImages: ImageReference[];
 };
 
 type WorkspaceActions = {

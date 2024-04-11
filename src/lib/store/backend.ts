@@ -1,4 +1,8 @@
-import { fetchPromptResult, fetchObjectInfo } from "@/lib/comfyui/api";
+import {
+  fetchPromptResult,
+  fetchObjectInfo,
+  postPrompt,
+} from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
 
@@ -10,6 +14,7 @@ import {
   BackendState,
   AlterateState,
 } from "./types";
+import { WorkflowDocument } from "../comfyui/workflow";
 
 function formatWebsocketUrl({
   machineName,
@@ -17,17 +22,6 @@ function formatWebsocketUrl({
   clientId,
 }: ConnectionDetails): string {
   return `ws://${machineName}:${port}/ws?clientId=${clientId}`;
-}
-
-function formatHttpUrl(
-  { machineName, port }: ConnectionDetails,
-  endpoint?: string
-): string {
-  if (endpoint) {
-    return `http://${machineName}:${port}/${endpoint}`;
-  }
-
-  return `http://${machineName}:${port}`;
 }
 
 const defaultBackendState: BackendState = {
@@ -211,28 +205,22 @@ export const createBackendPart: ImmerStateCreator<
     });
   },
 
-  sendPrompt: async (workflow: unknown) => {
+  sendPrompt: async (workflow: WorkflowDocument) => {
     const connection = get().backend.connection;
 
     if (connection === null) {
       console.error("No connection details available");
-      return;
+      return null;
     }
 
-    const url = formatHttpUrl(connection, "prompt");
-    const payload = JSON.stringify({
+    const request = {
       prompt: workflow,
       client_id: connection.clientId,
-    });
+    };
 
-    const res = await fetch(url, {
-      method: "POST",
-      body: payload,
-    });
+    const promptId = await postPrompt(connection, request);
 
-    const resp = await res.json();
-
-    return resp.prompt_id;
+    return promptId;
   },
 
   refreshDefinitions: async () => {
@@ -264,4 +252,6 @@ export const createBackendPart: ImmerStateCreator<
 
     get().notifyPromptCompleted(result[promptId]);
   },
+
+  acceptImage: async (reference) => {},
 });

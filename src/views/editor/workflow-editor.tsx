@@ -8,6 +8,7 @@ import { LivePreviewImage } from "./preview-image";
 import { QueueManager } from "./queue-manager";
 import { useAlterateStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
+import { ImageReferenceCard } from "./image-reference";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(
@@ -44,11 +45,7 @@ export function WorkflowEditorView() {
   }
 
   const images = outputImages.map((image) => {
-    const filename = image.filename;
-
-    const url = `http://localhost:8188/view?filename=${filename}&subfolder=${image.subfolder}&type=${image.type}`;
-
-    return <img key={url} src={url} alt={filename} />;
+    return <ImageReferenceCard key={image.filename} image={image} />;
   });
 
   return (

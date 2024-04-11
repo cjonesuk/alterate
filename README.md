@@ -58,3 +58,13 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - React
 - [Radix Primitives](https://www.radix-ui.com/primitives/docs/overview/introduction)
 - [Shadcn](https://ui.shadcn.com/)
+
+## Ideas
+
+- [p5js](https://p5js.org)
+
+  - [Pan and zoom](https://editor.p5js.org/palpista11/sketches/XRx0nlsXi)
+  - [Drawing](https://editor.p5js.org/ebenjmuse/sketches/SyUM1iX0b)
+
+- [tensorflowjs](https://github.com/tensorflow/tfjs)
+  - [Segmentation](https://towardsdatascience.com/real-time-semantic-segmentation-in-the-browser-using-tensorflow-js-e2e00a185139)

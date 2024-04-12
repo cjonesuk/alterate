@@ -81,22 +81,47 @@ export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
   return imageData;
 }
 
-export async function saveImage(target: ComfyUITarget) {
+export interface SaveImageRequest {
+  image: Blob;
+  overwrite: boolean;
+  type: string;
+  subfolder: string;
+  filename: string;
+}
+
+function formatFilename(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const seconds = now.getSeconds().toString().padStart(2, "0");
+
+  return `${year}${month}${day}_${hours}${minutes}${seconds}.png`;
+}
+
+export async function saveImage(
+  target: ComfyUITarget,
+  request: SaveImageRequest
+) {
   const url = getComfyUiHttpUrl(target, "upload/image");
 
-  throw new Error("Not implemented");
-  // const formData = new FormData();
-  // formData.append('file', 'data')
+  const filename = formatFilename();
 
-  // const res = await fetch(url, {
-  //   method: "POST",
-  //   body: {
+  const formData = new FormData();
+  formData.append("image", request.image, filename);
+  formData.append("overwrite", "true");
+  formData.append("type", "output");
+  formData.append("subfolder", "final");
+  formData.append("filename", filename);
 
-  //     image: undefined,
-  //     overwrite: false,
-  //     type: "output",
-  //     subfolder: "",
-  //   },
-  // });
-  // const root = await res.json();
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  console.log("res", res);
+  const root = await res.json();
+  console.log(root);
 }

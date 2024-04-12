@@ -7,7 +7,7 @@ A play on the words alter, generate and iterate. This project aims to implement 
 ### ComfyUI
 
 1. Install ComfyUI using their instructions
-2. Enable CORS by adding `--enable-cors-header` into the `run_nvidia_gpu.bat` file
+2. Enable CORS by adding `--enable-cors-header=*` into the `run_nvidia_gpu.bat` file (note: security implications)
 
 #### Custom Nodes
 

@@ -54,7 +54,7 @@ type BackendActions = {
   sendPrompt(workflow: WorkflowDocument): Promise<string | null>;
   refreshDefinitions(): Promise<void>;
   promptCompleted(promptId: string): Promise<void>;
-  acceptImage(reference: ImageReference): Promise<void>;
+  acceptImage(reference: ImageReference, image: Blob): Promise<void>;
 };
 
 export type BackendPart = BackendActions & {

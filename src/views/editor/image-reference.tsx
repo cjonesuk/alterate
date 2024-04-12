@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { fetchImage } from "@/lib/comfyui/api";
 import { ImageReference } from "@/lib/comfyui/images";
 import { useAlterateStore } from "@/lib/store";
@@ -30,6 +31,7 @@ function useBlobObjectUrl(blob: Blob | null | undefined) {
 
 export function ImageReferenceCard({ image }: Props) {
   const connection = useAlterateStore((store) => store.backend.connection);
+  const acceptImage = useAlterateStore((store) => store.acceptImage);
 
   const { data } = useQuery({
     queryKey: ["image", image.filename, image.subfolder, image.type],
@@ -51,5 +53,18 @@ export function ImageReferenceCard({ image }: Props) {
 
   const filename = image.filename;
 
-  return <img key={url} src={url} alt={filename} />;
+  const handleAcceptImage = () => {
+    if (!data) return;
+
+    acceptImage(image, data);
+  };
+
+  return (
+    <div className="p-4 flex flex-col gap-2">
+      <img key={url} src={url} alt={filename} />
+      <div className="flex flex-row justify-end">
+        <Button onClick={handleAcceptImage}>Accept</Button>
+      </div>
+    </div>
+  );
 }

@@ -2,6 +2,7 @@ import {
   fetchPromptResult,
   fetchObjectInfo,
   postPrompt,
+  saveImage,
 } from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
@@ -253,5 +254,22 @@ export const createBackendPart: ImmerStateCreator<
     get().notifyPromptCompleted(result[promptId]);
   },
 
-  acceptImage: async (reference) => {},
+  acceptImage: async (reference, image) => {
+    console.log("Accepting image", reference);
+
+    const connection = get().backend.connection;
+
+    if (!connection) {
+      console.error("No connection details available");
+      return;
+    }
+
+    await saveImage(connection, {
+      filename: reference.filename,
+      subfolder: "FINAL",
+      type: reference.type,
+      overwrite: false,
+      image,
+    });
+  },
 });

@@ -37,7 +37,8 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Navigate to ComfyUI
 - [x] Use a central store (zustand)
 - [ ] Websocket reconnection handling
-- [ ] Display final output images
+- [x] Display final output images
+- [x] Save output image to a final directory
 - [ ] Show progress details (node stage)
 - [ ] Cancel current job
 - [ ] Loading a workflow (removing built in default workflow)

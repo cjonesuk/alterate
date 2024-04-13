@@ -73,7 +73,6 @@ export type WorkspaceState = {
 };
 
 type WorkspaceActions = {
-  loadDefaultWorkspace(): Promise<void>;
   loadWorkspace(definition: WorkspaceDefinition): Promise<void>;
   startJob(workflow: WorkflowDocument): Promise<void>;
   notifyPromptCompleted(result: HistoryPromptResult): void;

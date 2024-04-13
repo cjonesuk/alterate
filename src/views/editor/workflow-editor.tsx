@@ -9,6 +9,8 @@ import { QueueManager } from "./queue-manager";
 import { useAlterateStore } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { ImageReferenceCard } from "./image-reference";
+import basic_workflow_data from "../../assets/basic_workflow.json";
+import canny_workflow_data from "../../assets/canny_workflow.json";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(
@@ -24,7 +26,7 @@ export function WorkflowEditorView() {
   );
 
   const connect = useAlterateStore((store) => store.connectToDefault);
-  const loadWorkspace = useAlterateStore((store) => store.loadDefaultWorkspace);
+  const loadWorkspace = useAlterateStore((store) => store.loadWorkspace);
 
   const { form, submit } = useWorkflowEditorForm();
 
@@ -36,10 +38,23 @@ export function WorkflowEditorView() {
     );
   }
 
+  const loadBasicWorkflow = async () => {
+    await loadWorkspace({
+      workflow: basic_workflow_data,
+    });
+  };
+
+  const loadCannyWorkflow = async () => {
+    await loadWorkspace({
+      workflow: canny_workflow_data,
+    });
+  };
+
   if (!workspaceDefinition) {
     return (
       <div>
-        <Button onClick={loadWorkspace}>Load Workflow</Button>
+        <Button onClick={loadBasicWorkflow}>Basic Workflow</Button>
+        <Button onClick={loadCannyWorkflow}>Canny Workflow</Button>
       </div>
     );
   }

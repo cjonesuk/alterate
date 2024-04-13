@@ -1,6 +1,10 @@
 import { ComfyUITarget } from "./connection";
 import { HistoryResult } from "./history";
-import { ImageReference } from "./images";
+import {
+  ImageReference,
+  UploadImageRequest,
+  UploadImageResult,
+} from "./images";
 import { ObjectInfoRoot } from "./node-definitions";
 import { WorkflowDocument } from "./workflow";
 
@@ -81,47 +85,25 @@ export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
   return imageData;
 }
 
-export interface SaveImageRequest {
-  image: Blob;
-  overwrite: boolean;
-  type: string;
-  subfolder: string;
-  filename: string;
-}
-
-function formatFilename(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = (now.getMonth() + 1).toString().padStart(2, "0");
-  const day = now.getDate().toString().padStart(2, "0");
-  const hours = now.getHours().toString().padStart(2, "0");
-  const minutes = now.getMinutes().toString().padStart(2, "0");
-  const seconds = now.getSeconds().toString().padStart(2, "0");
-
-  return `${year}${month}${day}_${hours}${minutes}${seconds}.png`;
-}
-
-export async function saveImage(
+export async function uploadImage(
   target: ComfyUITarget,
-  request: SaveImageRequest
-) {
+  request: UploadImageRequest
+): Promise<UploadImageResult> {
   const url = getComfyUiHttpUrl(target, "upload/image");
 
-  const filename = formatFilename();
-
   const formData = new FormData();
-  formData.append("image", request.image, filename);
-  formData.append("overwrite", "true");
-  formData.append("type", "output");
-  formData.append("subfolder", "final");
-  formData.append("filename", filename);
+  formData.append("image", request.image, request.filename);
+  formData.append("overwrite", request.overwrite ? "true" : "false");
+  formData.append("type", request.type);
+  formData.append("subfolder", request.subfolder);
+  formData.append("filename", request.filename);
 
   const res = await fetch(url, {
     method: "POST",
     body: formData,
   });
 
-  console.log("res", res);
   const root = await res.json();
-  console.log(root);
+
+  return root as UploadImageResult;
 }

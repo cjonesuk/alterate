@@ -9,19 +9,20 @@ import {
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
-import {
-  WorkflowEditorForm,
-  WorkflowEditorNode,
-  WorkflowEditorNodeInput,
-} from "./form";
+import { WorkflowEditorForm } from "./form";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import {
   BooleanFormField,
   FloatFormField,
+  ImageFilenamesFormField,
   IntFormField,
   StringFormField,
   StringValuesFormField,
 } from "./form-fields";
+import {
+  WorkflowEditorNode,
+  WorkflowEditorNodeInput,
+} from "@/lib/editor-mapping";
 
 interface Props {
   editor: WorkflowEditorNode;
@@ -100,6 +101,17 @@ function mapComponent(
   if (definition.type === InputTypes.STRING_VALUES) {
     return (
       <StringValuesFormField
+        key={key}
+        definition={definition}
+        input={input}
+        form={form}
+      />
+    );
+  }
+
+  if (definition.type === InputTypes.IMAGE_FILENAMES) {
+    return (
+      <ImageFilenamesFormField
         key={key}
         definition={definition}
         input={input}

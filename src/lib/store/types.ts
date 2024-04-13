@@ -55,6 +55,7 @@ type BackendActions = {
   refreshDefinitions(): Promise<void>;
   promptCompleted(promptId: string): Promise<void>;
   acceptImage(reference: ImageReference, image: Blob): Promise<void>;
+  uploadImage(file: File): Promise<ImageReference>;
 };
 
 export type BackendPart = BackendActions & {

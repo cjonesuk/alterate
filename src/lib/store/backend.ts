@@ -2,7 +2,7 @@ import {
   fetchPromptResult,
   fetchObjectInfo,
   postPrompt,
-  saveImage,
+  uploadImage,
 } from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
@@ -264,12 +264,55 @@ export const createBackendPart: ImmerStateCreator<
       return;
     }
 
-    await saveImage(connection, {
-      filename: reference.filename,
-      subfolder: "FINAL",
+    const filename = formatFilename();
+
+    await uploadImage(connection, {
+      filename: filename,
+      subfolder: "final",
       type: reference.type,
       overwrite: false,
       image,
     });
   },
+
+  uploadImage: async (file) => {
+    console.log("Uploading image", file);
+
+    const connection = get().backend.connection;
+
+    if (!connection) {
+      throw new Error("No connection details available");
+    }
+
+    const data = await file.arrayBuffer();
+    const blob = new Blob([data], { type: file.type });
+
+    const reference = await uploadImage(connection, {
+      filename: file.name,
+      subfolder: "",
+      type: "input",
+      overwrite: true,
+      image: blob,
+    });
+
+    console.log("upload complete", reference);
+
+    return {
+      filename: reference.name,
+      subfolder: reference.subfolder,
+      type: reference.type,
+    };
+  },
 });
+
+function formatFilename(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = (now.getMonth() + 1).toString().padStart(2, "0");
+  const day = now.getDate().toString().padStart(2, "0");
+  const hours = now.getHours().toString().padStart(2, "0");
+  const minutes = now.getMinutes().toString().padStart(2, "0");
+  const seconds = now.getSeconds().toString().padStart(2, "0");
+
+  return `${year}${month}${day}_${hours}${minutes}${seconds}.png`;
+}

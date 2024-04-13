@@ -1,6 +1,7 @@
 import {
   BooleanType,
   FloatType,
+  ImageFilenamesType,
   IntType,
   StringType,
   StringValuesType,
@@ -24,6 +25,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+import { useDropzone } from "react-dropzone";
+import { useCallback, useState } from "react";
+import { useAlterateStore } from "@/lib/store";
+import { ImageReference } from "@/lib/comfyui/images";
 
 export function StringFormField({
   definition,
@@ -181,6 +187,95 @@ export function StringValuesFormField({
           <FormMessage />
         </FormItem>
       )}
+    />
+  );
+}
+
+function ImageDropzone({
+  onUploaded,
+}: {
+  onUploaded: (reference: ImageReference) => void;
+}) {
+  const uploadImage = useAlterateStore((state) => state.uploadImage);
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const file = acceptedFiles[0];
+
+      uploadImage(file).then(onUploaded);
+    },
+    [uploadImage, onUploaded]
+  );
+
+  const { getRootProps, getInputProps, isDragAccept, isDragReject } =
+    useDropzone({ onDrop, accept: { "image/*": [] }, maxFiles: 1 });
+
+  const borderColour = isDragReject
+    ? "border-red-500"
+    : isDragAccept
+      ? "border-green-500"
+      : "border-gray-300";
+
+  return (
+    <div
+      {...getRootProps()}
+      className={`border-2 border-dashed ${borderColour} rounded p-4 text-center cursor-pointer`}
+    >
+      <input {...getInputProps()} />
+
+      <p>Drag 'n' drop some files here, or click to select files</p>
+    </div>
+  );
+}
+
+export function ImageFilenamesFormField({
+  definition,
+  input,
+  form,
+}: InputFormFieldProps<ImageFilenamesType>) {
+  return (
+    <FormField
+      control={form.control}
+      name={input.fieldId}
+      defaultValue={input.value}
+      render={({ field }) => {
+        const appendEntry = !definition.values.includes(field.value);
+        return (
+          <FormItem>
+            <FormLabel>{definition.name}</FormLabel>
+            <Select
+              onValueChange={field.onChange}
+              defaultValue={field.value}
+              value={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a file" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {definition.values.map((value) => (
+                  <SelectItem key={value} value={value}>
+                    {value}
+                  </SelectItem>
+                ))}
+                {appendEntry && (
+                  <SelectItem key={field.value} value={field.value}>
+                    {field.value}
+                  </SelectItem>
+                )}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+
+            <ImageDropzone
+              onUploaded={(reference) => {
+                field.onChange(reference.filename);
+              }}
+            />
+          </FormItem>
+        );
+      }}
     />
   );
 }

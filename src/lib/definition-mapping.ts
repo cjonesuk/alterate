@@ -12,6 +12,7 @@ export const InputTypes = {
   BOOLEAN: "types/BOOLEAN",
   STRING: "types/STRING",
   STRING_VALUES: "types/STRING_VALUES",
+  IMAGE_FILENAMES: "types/IMAGE_FILENAMES",
   IGNORED: "IGNORED",
 } as const;
 
@@ -54,6 +55,11 @@ export type StringValuesType = NodeInput & {
   values: string[];
 };
 
+export type ImageFilenamesType = NodeInput & {
+  type: typeof InputTypes.IMAGE_FILENAMES;
+  values: string[];
+};
+
 export type IgnoredType = NodeInput & {
   type: typeof InputTypes.IGNORED;
 };
@@ -64,6 +70,7 @@ export type AnyInputType =
   | BooleanType
   | StringType
   | StringValuesType
+  | ImageFilenamesType
   | IgnoredType;
 
 export type NodeDefinition = {
@@ -73,7 +80,7 @@ export type NodeDefinition = {
 
 function mapInput(
   inputName: string,
-  inputDef: InputDefinition,
+  inputDef: InputDefinition
 ): AnyInputType | undefined {
   if (inputDef instanceof Array) {
     const [type, ...rest] = inputDef;
@@ -81,6 +88,15 @@ function mapInput(
     const properties = rest[0] as FluffyRequired | undefined;
 
     if (type instanceof Array) {
+      if (properties?.image_upload) {
+        return {
+          type: InputTypes.IMAGE_FILENAMES,
+          required: true,
+          name: inputName,
+          values: type as string[],
+        };
+      }
+
       return {
         type: InputTypes.STRING_VALUES,
         required: true,
@@ -143,7 +159,7 @@ function mapInput(
 }
 
 function mapRequiredInputs(
-  required: Input["required"] | undefined,
+  required: Input["required"] | undefined
 ): AnyInputType[] {
   if (!required) {
     return [];
@@ -162,7 +178,7 @@ function mapRequiredInputs(
 
 function mapNode(
   classType: string,
-  entry: ObjectNode,
+  entry: ObjectNode
 ): NodeDefinition | undefined {
   const requiredInputs = mapRequiredInputs(entry.input.required);
 
@@ -188,6 +204,6 @@ export function mapObjectInfo(root: ObjectInfoRoot): NodeDefinitionMap {
     .filter(Boolean) as NodeDefinition[];
 
   return new Map<string, NodeDefinition>(
-    nodeDefinitions.map((x) => [x?.class_type, x]),
+    nodeDefinitions.map((x) => [x?.class_type, x])
   );
 }

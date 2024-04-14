@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ImageReferenceCard } from "./image-reference";
 import basic_workflow_data from "../../assets/basic_workflow.json";
 import canny_workflow_data from "../../assets/canny_workflow.json";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(
@@ -65,12 +66,16 @@ export function WorkflowEditorView() {
 
   return (
     <FormProvider {...form}>
-      <div className="w-full flex flex-row items-start p-4">
-        <div className="flex-grow">
+      <div className="w-full h-full flex flex-row items-start p-4">
+        <ScrollArea className="h-full">
           <WorkflowEditorPanel form={form} />
-        </div>
+          <ScrollBar orientation="vertical" />
+        </ScrollArea>
 
-        <div>{images}</div>
+        <div className="flex-grow">
+          {images}
+          {images.length === 0 && <p>no images</p>}
+        </div>
 
         <Sidebar>
           <LivePreviewImage />

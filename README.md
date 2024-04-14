@@ -40,7 +40,7 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Display final output images
 - [x] Save output image to a final directory
 - [ ] Show progress details (node stage)
-- [ ] Cancel current job
+- [x] Cancel current job
 - [ ] Loading a workflow (removing built in default workflow)
 - [ ] Improve node editor panel UI
 - [x] Select and upload images

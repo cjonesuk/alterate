@@ -14,7 +14,7 @@ export function WorkflowEditorPanel({ form }: WorkflowEditorPanelProps) {
   });
 
   return (
-    <div className="flex flex-row flex-wrap justify-start gap-2 min-h-[200px]">
+    <div className="flex flex-col justify-start gap-2 min-h-[200px]">
       {!editorCards && <div>Not Available</div>}
 
       {editorCards}

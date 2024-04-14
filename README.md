@@ -43,7 +43,9 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [ ] Cancel current job
 - [ ] Loading a workflow (removing built in default workflow)
 - [ ] Improve node editor panel UI
-- [ ] Image input support
+- [x] Select and upload images
+- [ ] Show image preview of image input
+- [ ] Image masks
 
 ### Long term
 

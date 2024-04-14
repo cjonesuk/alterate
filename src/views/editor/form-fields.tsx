@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { useDropzone } from "react-dropzone";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useAlterateStore } from "@/lib/store";
 import { ImageReference } from "@/lib/comfyui/images";
 

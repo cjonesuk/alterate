@@ -65,7 +65,7 @@ export async function postPrompt(
   return resp.prompt_id;
 }
 
-export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
+export function makeImageUrl(target: ComfyUITarget, image: ImageReference) {
   const search = new URLSearchParams();
 
   search.append("filename", image.filename);
@@ -75,6 +75,12 @@ export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
   const searchString = search.toString();
 
   const url = getComfyUiHttpUrl(target, `view?${searchString}`);
+
+  return url;
+}
+
+export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
+  const url = makeImageUrl(target, image);
 
   const res = await fetch(url, {
     method: "GET",
@@ -106,4 +112,14 @@ export async function uploadImage(
   const root = await res.json();
 
   return root as UploadImageResult;
+}
+
+export async function interuptPrompt(target: ComfyUITarget) {
+  const url = getComfyUiHttpUrl(target, "interrupt");
+
+  const res = await fetch(url, {
+    method: "POST",
+  });
+
+  console.log("Interrupted prompt", res.status);
 }

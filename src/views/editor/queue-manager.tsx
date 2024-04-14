@@ -10,6 +10,7 @@ interface Props {
 export function QueueManager({ submit }: Props) {
   const queue = useAlterateStore((store) => store.backend.queue);
   const connection = useAlterateStore((store) => store.backend.connection);
+  const interuptPrompt = useAlterateStore((store) => store.interuptPrompt);
 
   if (!connection) {
     return <div>Not connected</div>;
@@ -23,6 +24,9 @@ export function QueueManager({ submit }: Props) {
       <p>Jobs: {`${queue.length}`}</p>
       <Button type="button" onClick={submit}>
         Queue Job
+      </Button>
+      <Button type="button" onClick={interuptPrompt}>
+        Interupt
       </Button>
       <Button asChild variant="outline">
         <a href={comfyuiUrl} target="_blank">

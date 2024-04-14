@@ -3,6 +3,7 @@ import {
   fetchObjectInfo,
   postPrompt,
   uploadImage,
+  interuptPrompt,
 } from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
@@ -302,6 +303,17 @@ export const createBackendPart: ImmerStateCreator<
       subfolder: reference.subfolder,
       type: reference.type,
     };
+  },
+
+  interuptPrompt: async () => {
+    const connection = get().backend.connection;
+
+    if (!connection) {
+      console.error("No connection details available");
+      return;
+    }
+
+    await interuptPrompt(connection);
   },
 });
 

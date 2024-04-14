@@ -60,10 +60,12 @@ export function ImageReferenceCard({ image }: Props) {
   };
 
   return (
-    <div className="p-4 flex flex-col gap-2">
-      <img key={url} src={url} alt={filename} />
-      <div className="flex flex-row justify-end">
-        <Button onClick={handleAcceptImage}>Accept</Button>
+    <div className="p-4 flex flex-col gap-2 w-96">
+      <img key={url} src={url} alt={filename} className="rounded-md" />
+      <div className="flex flex-row justify-start">
+        <Button className="w-full" onClick={handleAcceptImage}>
+          Accept
+        </Button>
       </div>
     </div>
   );

@@ -72,10 +72,10 @@ export function WorkflowEditorView() {
           <ScrollBar orientation="vertical" />
         </ScrollArea>
 
-        <div className="flex-grow">
+        <ScrollArea className="h-full flex-grow gap-4">
           {images}
           {images.length === 0 && <p>no images</p>}
-        </div>
+        </ScrollArea>
 
         <Sidebar>
           <LivePreviewImage />

@@ -5,7 +5,6 @@ import React from "react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "../../components/ui/card";
@@ -35,10 +34,16 @@ export const NodeEditorCard: React.FC<Props> = ({ editor, form }) => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle> {editor.node._meta.title}</CardTitle>
-        <CardDescription> {editor.node.class_type}</CardDescription>
+        <CardTitle className="text-xl">
+          <span>{editor.node._meta.title}</span>
+          <span className="pl-2 text-xs  text-slate-500 dark:text-slate-400">
+            {"["}
+            {editor.node.class_type}
+            {"]"}
+          </span>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-col space-y-2">{inputs}</CardContent>
+      <CardContent className="flex flex-col space-y-1">{inputs}</CardContent>
     </Card>
   );
 };

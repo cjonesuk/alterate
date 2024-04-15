@@ -13,6 +13,8 @@ export type ImmerStateCreator<T, TPart> = StateCreator<
 >;
 
 export type ConnectionDetails = {
+  name: string;
+  description: string;
   machineName: string;
   port: number;
   clientId: string;
@@ -46,7 +48,6 @@ export type BackendState = {
 };
 
 type BackendActions = {
-  connectToDefault: () => void;
   connect: (details: ConnectionDetails) => void;
   updateLiveImage(imageBlob: Blob): void;
   updateProgress(promptId: string, step: number, steps: number): void;

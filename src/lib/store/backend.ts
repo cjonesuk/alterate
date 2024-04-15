@@ -47,23 +47,21 @@ const defaultBackendState: BackendState = {
   definitions: null,
 };
 
-const clientId = uuidv4();
-
-const defaultComfyUiTarget = {
-  machineName: "localhost",
-  port: 8188,
-  clientId,
-};
+export const defaultBackends: ConnectionDetails[] = [
+  {
+    name: "Local",
+    description: "A basic installation of ComfyUI",
+    machineName: "localhost",
+    port: 8188,
+    clientId: uuidv4(),
+  },
+];
 
 export const createBackendPart: ImmerStateCreator<
   AlterateState,
   BackendPart
 > = (set, get) => ({
   backend: defaultBackendState,
-
-  connectToDefault: () => {
-    get().connect(defaultComfyUiTarget);
-  },
 
   connect: (details: ConnectionDetails) => {
     const existingSocket = get().backend.websocket;

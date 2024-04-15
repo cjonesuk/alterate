@@ -13,6 +13,7 @@ export type ImmerStateCreator<T, TPart> = StateCreator<
 >;
 
 export type ConnectionDetails = {
+  id: string;
   name: string;
   description: string;
   machineName: string;

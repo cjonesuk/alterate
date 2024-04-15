@@ -12,7 +12,7 @@ import { ImageReferenceCard } from "./image-reference";
 import basic_workflow_data from "../../assets/basic_workflow.json";
 import canny_workflow_data from "../../assets/canny_workflow.json";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { BackendSelectionView } from "../backend-selection";
+import { BackendSelectionView } from "../backends/backend-selection";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(

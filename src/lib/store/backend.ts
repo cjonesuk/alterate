@@ -49,6 +49,7 @@ const defaultBackendState: BackendState = {
 
 export const defaultBackends: ConnectionDetails[] = [
   {
+    id: uuidv4(),
     name: "Local",
     description: "A basic installation of ComfyUI",
     machineName: "localhost",

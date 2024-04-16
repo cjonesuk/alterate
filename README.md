@@ -41,13 +41,14 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Save output image to a final directory
 - [ ] Show progress details (node stage)
 - [x] Cancel current job
-- [ ] Loading a workflow (removing built in default workflow)
+- [x] Loading a workflow
 - [ ] Improve node editor panel UI
 - [x] Select and upload images
 - [ ] Show image preview of image input
 - [ ] Image masks
 - [x] Backend selection UI
 - [x] Backend management UI - Add, Remove and save to local storage
+- [ ] Remove built in default workflows
 
 ### Long term
 

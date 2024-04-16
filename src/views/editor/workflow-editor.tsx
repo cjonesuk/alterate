@@ -7,12 +7,11 @@ import { JobProgress } from "./job-progress";
 import { LivePreviewImage } from "./preview-image";
 import { QueueManager } from "./queue-manager";
 import { useAlterateStore } from "@/lib/store";
-import { Button } from "@/components/ui/button";
 import { ImageReferenceCard } from "./image-reference";
-import basic_workflow_data from "../../assets/basic_workflow.json";
-import canny_workflow_data from "../../assets/canny_workflow.json";
+
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { BackendSelectionView } from "../backends/backend-selection";
+import { WorkflowSelectionView } from "../workflows/workflow-selection";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(
@@ -27,33 +26,14 @@ export function WorkflowEditorView() {
     (store) => store.workspace.outputImages
   );
 
-  const loadWorkspace = useAlterateStore((store) => store.loadWorkspace);
-
   const { form, submit } = useWorkflowEditorForm();
 
   if (!connected) {
     return <BackendSelectionView />;
   }
 
-  const loadBasicWorkflow = async () => {
-    await loadWorkspace({
-      workflow: basic_workflow_data,
-    });
-  };
-
-  const loadCannyWorkflow = async () => {
-    await loadWorkspace({
-      workflow: canny_workflow_data,
-    });
-  };
-
   if (!workspaceDefinition) {
-    return (
-      <div>
-        <Button onClick={loadBasicWorkflow}>Basic Workflow</Button>
-        <Button onClick={loadCannyWorkflow}>Canny Workflow</Button>
-      </div>
-    );
+    return <WorkflowSelectionView />;
   }
 
   const images = outputImages.map((image) => {

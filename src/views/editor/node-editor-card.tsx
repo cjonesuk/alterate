@@ -2,12 +2,6 @@ import { InputTypes } from "../../lib/definition-mapping";
 
 import React from "react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../components/ui/card";
 import { WorkflowEditorForm } from "./form";
 import { FieldValues, UseFormReturn } from "react-hook-form";
 import {
@@ -28,23 +22,21 @@ interface Props {
   form: WorkflowEditorForm;
 }
 
-export const NodeEditorCard: React.FC<Props> = ({ editor, form }) => {
+export const NodeEditorSection: React.FC<Props> = ({ editor, form }) => {
   const inputs = editor.inputs.map((input) => mapComponent(form, input));
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-xl">
-          <span>{editor.node._meta.title}</span>
-          <span className="pl-2 text-xs  text-slate-500 dark:text-slate-400">
-            {"["}
-            {editor.node.class_type}
-            {"]"}
-          </span>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col space-y-1">{inputs}</CardContent>
-    </Card>
+    <div className="flex flex-col p-4 gap-2">
+      <p className="text-xl font-semibold leading-none tracking-tight">
+        <span>{editor.node._meta.title}</span>
+        <span className="pl-2 text-xs  text-slate-500 dark:text-slate-400">
+          {"["}
+          {editor.node.class_type}
+          {"]"}
+        </span>
+      </p>
+      <div className="grid gap-0">{inputs}</div>
+    </div>
   );
 };
 

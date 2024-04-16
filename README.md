@@ -42,7 +42,7 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [ ] Show progress details (node stage)
 - [x] Cancel current job
 - [x] Loading a workflow
-- [ ] Improve node editor panel UI
+- [x] Improve node editor panel UI
 - [x] Select and upload images
 - [ ] Show image preview of image input
 - [ ] Image masks

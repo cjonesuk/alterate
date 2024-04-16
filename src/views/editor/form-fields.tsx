@@ -43,9 +43,11 @@ export function StringFormField({
         name={input.fieldId}
         defaultValue={input.value}
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>{definition.name}</FormLabel>
-            <FormControl>
+          <FormItem className="grid grid-cols-4">
+            <FormLabel className="flex items-center">
+              {definition.name}
+            </FormLabel>
+            <FormControl className="col-span-3">
               <Textarea
                 placeholder={definition.placeholder}
                 className="resize-none"
@@ -65,9 +67,9 @@ export function StringFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{definition.name}</FormLabel>
-          <FormControl>
+        <FormItem className="grid grid-cols-4">
+          <FormLabel className="flex items-center">{definition.name}</FormLabel>
+          <FormControl className="col-span-3">
             <Input placeholder={definition.placeholder} {...field} />
           </FormControl>
           <FormMessage />
@@ -88,9 +90,9 @@ export function IntFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{definition.name}</FormLabel>
-          <FormControl>
+        <FormItem className="grid grid-cols-4">
+          <FormLabel className="flex items-center">{definition.name}</FormLabel>
+          <FormControl className="col-span-3">
             <Input
               type="number"
               {...field}
@@ -116,9 +118,9 @@ export function FloatFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{definition.name}</FormLabel>
-          <FormControl>
+        <FormItem className="grid grid-cols-4">
+          <FormLabel className="flex items-center">{definition.name}</FormLabel>
+          <FormControl className="col-span-3">
             <Input
               type="number"
               {...field}
@@ -145,9 +147,9 @@ export function BooleanFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{definition.name}</FormLabel>
-          <FormControl>
+        <FormItem className="grid grid-cols-4">
+          <FormLabel className="flex items-center">{definition.name}</FormLabel>
+          <FormControl className="col-span-3">
             <Switch checked={field.value} onCheckedChange={field.onChange} />
           </FormControl>
           <FormMessage />
@@ -168,10 +170,10 @@ export function StringValuesFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>{definition.name}</FormLabel>
+        <FormItem className="grid grid-cols-4">
+          <FormLabel className="flex items-center">{definition.name}</FormLabel>
           <Select onValueChange={field.onChange} defaultValue={field.value}>
-            <FormControl>
+            <FormControl className="col-span-3 align-middle">
               <SelectTrigger>
                 <SelectValue placeholder="Select a value" />
               </SelectTrigger>
@@ -241,7 +243,7 @@ export function ImageFilenamesFormField({
       render={({ field }) => {
         const appendEntry = !definition.values.includes(field.value);
         return (
-          <FormItem>
+          <FormItem className="grid grid-cols-4 gap-4">
             <FormLabel>{definition.name}</FormLabel>
             <Select
               onValueChange={field.onChange}

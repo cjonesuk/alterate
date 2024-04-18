@@ -49,14 +49,21 @@ A play on the words alter, generate and iterate. This project aims to implement 
 - [x] Backend selection UI
 - [x] Backend management UI - Add, Remove and save to local storage
 - [ ] Remove built in default workflows
+- [ ] Disconnect from current backend and show backend management view
+- [ ] Seed management
+- [ ] Input filtering
+- [ ] Display output per node (e.g. image previews)
+- [ ] Debug mode - add ImagePreview nodes to every image output of every node
 
 ### Long term
 
 - [ ] Image editor
 - [ ] Inpainting workflow support
 - [ ] Multi workflow projects
+- [ ] Multi stage workflows (idea - comfyUI custom nodes to denote breakpoints)
 - [ ] Built in image editing using workflows
 - [ ] Edit workflows by embedding ComfyUI in an iframe
+- [ ]
 
 ## Dependencies
 

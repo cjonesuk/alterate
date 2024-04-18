@@ -30,6 +30,11 @@ import { useDropzone } from "react-dropzone";
 import { useCallback } from "react";
 import { useAlterateStore } from "@/lib/store";
 import { ImageReference } from "@/lib/comfyui/images";
+import { useDialogControl } from "@/lib/dialog-control";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { DialogTrigger } from "@radix-ui/react-dialog";
+import { Button } from "@/components/ui/button";
+import { ImageEditor } from "./image-editor";
 
 export function StringFormField({
   definition,
@@ -235,6 +240,8 @@ export function ImageFilenamesFormField({
   input,
   form,
 }: InputFormFieldProps<ImageFilenamesType>) {
+  const [open, setOpen] = useDialogControl();
+
   return (
     <FormField
       control={form.control}
@@ -243,14 +250,14 @@ export function ImageFilenamesFormField({
       render={({ field }) => {
         const appendEntry = !definition.values.includes(field.value);
         return (
-          <FormItem className="grid grid-cols-4 gap-4">
-            <FormLabel>{definition.name}</FormLabel>
+          <FormItem className="grid grid-cols-4 grid-rows-3 gap-1">
+            <FormLabel className="row-span-full">{definition.name}</FormLabel>
             <Select
               onValueChange={field.onChange}
               defaultValue={field.value}
               value={field.value}
             >
-              <FormControl>
+              <FormControl className="col-span-3">
                 <SelectTrigger>
                   <SelectValue placeholder="Select a file" />
                 </SelectTrigger>
@@ -270,11 +277,24 @@ export function ImageFilenamesFormField({
             </Select>
             <FormMessage />
 
-            <ImageDropzone
-              onUploaded={(reference) => {
-                field.onChange(reference.filename);
-              }}
-            />
+            <div className="col-span-3">
+              <ImageDropzone
+                onUploaded={(reference) => {
+                  field.onChange(reference.filename);
+                }}
+              />
+            </div>
+
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild>
+                <Button className="col-span-3" variant="secondary">
+                  Edit
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <ImageEditor />
+              </DialogContent>
+            </Dialog>
           </FormItem>
         );
       }}

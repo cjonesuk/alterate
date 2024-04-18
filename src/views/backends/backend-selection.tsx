@@ -2,12 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useAlterateStore } from "@/lib/store";
 import { defaultBackends } from "@/lib/store/backend";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { ConnectionDetails } from "@/lib/store/types";
 import { v4 as uuidv4 } from "uuid";
 import { BackendConnectionCard } from "./backend-card";
 import { AddBackendForm } from "./form";
 import { useLocalStorage } from "./local-storage";
+import { useDialogControl } from "@/lib/dialog-control";
 
 function useBackends(close: () => void) {
   const [backends, updateBackends] = useLocalStorage<ConnectionDetails[]>(
@@ -50,7 +51,7 @@ function useBackends(close: () => void) {
 
 export function BackendSelectionView() {
   const connect = useAlterateStore((store) => store.connect);
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useDialogControl();
 
   const { backends, addBackend, removeBackend } = useBackends(() =>
     setOpen(false)

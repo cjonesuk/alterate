@@ -20,15 +20,8 @@ function Thing() {
 
   const renderTexture = useMemo(() => {
     const rt = PIXI.RenderTexture.create(stageSize);
-
-    brush.position.set(400, 300);
-    app.renderer.render(brush, {
-      renderTexture: rt,
-      clear: false,
-      skipUpdateTransform: false,
-    });
     return rt;
-  }, [app]);
+  }, []);
 
   const pointerMove: PIXI.FederatedEventHandler = useCallback(
     ({ global: { x, y } }) => {

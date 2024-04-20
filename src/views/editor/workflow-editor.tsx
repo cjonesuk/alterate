@@ -12,7 +12,7 @@ import { ImageReferenceCard } from "./image-reference";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { BackendSelectionView } from "../backends/backend-selection";
 import { WorkflowSelectionView } from "../workflows/workflow-selection";
-import { ImageEditor } from "./image-editor";
+import { ImageEditor } from "../../components/image-editor/image-editor";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(

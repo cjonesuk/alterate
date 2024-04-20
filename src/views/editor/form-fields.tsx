@@ -34,7 +34,7 @@ import { useDialogControl } from "@/lib/dialog-control";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
-import { ImageEditor } from "./image-editor";
+import { ImageEditor } from "../../components/image-editor/image-editor";
 
 export function StringFormField({
   definition,

@@ -12,7 +12,7 @@ const brush = new PIXI.Graphics()
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
 
-function Thing() {
+function PaintingLayer() {
   const app = useApp();
 
   const draggingRef = useRef(false);
@@ -27,11 +27,13 @@ function Thing() {
     ({ global: { x, y } }) => {
       if (draggingRef.current) {
         brush.position.set(x, y);
+
         app.renderer.render(brush, {
           renderTexture,
           clear: false,
           skipUpdateTransform: false,
         });
+
         // Smooth out the drawing a little bit to make it look nicer
         // this connects the previous drawn point to the current one
         // using a line
@@ -41,12 +43,14 @@ function Thing() {
             .lineStyle({ width: 100, color: 0xffffff })
             .moveTo(lastDrawnPointRef.current.x, lastDrawnPointRef.current.y)
             .lineTo(x, y);
+
           app.renderer.render(line, {
             renderTexture,
             clear: false,
             skipUpdateTransform: false,
           });
         }
+
         lastDrawnPointRef.current =
           lastDrawnPointRef.current || new PIXI.Point();
         lastDrawnPointRef.current.set(x, y);
@@ -85,7 +89,7 @@ export function ImageEditor() {
     <div>
       <Stage width={800} height={600} options={{ backgroundColor: "#FF0000" }}>
         <Sprite source="https://pixijs.com/assets/bg_grass.jpg" />
-        <Thing />
+        <PaintingLayer />
 
         {/* <Sprite texture={renderTexture}></Sprite> */}
         <Container x={200} y={200}>

@@ -30,7 +30,7 @@ export function WorkflowEditorView() {
   const { form, submit } = useWorkflowEditorForm();
 
   if (!connected) {
-    return <ImageEditor />;
+    return <ImageEditor onSave={() => console.log("save")} />;
     // return <BackendSelectionView />;
   }
 

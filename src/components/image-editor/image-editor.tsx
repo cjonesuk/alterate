@@ -1,8 +1,8 @@
-import { Stage, Container, Sprite, Text, useApp } from "@pixi/react";
+import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-const stageSize = { width: 800, height: 600 };
+const imageSize = { width: 800, height: 600 };
 
 const brush = new PIXI.Graphics()
   .beginFill(0xffffff)
@@ -12,65 +12,94 @@ const brush = new PIXI.Graphics()
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
 
-function PaintingLayer() {
-  const app = useApp();
+interface UseMouseFlowInput {
+  onMove: (point: PIXI.Point, last: PIXI.Point | null) => void;
+}
 
+function useMouseFlow({ onMove }: UseMouseFlowInput) {
   const draggingRef = useRef(false);
   const lastDrawnPointRef = useRef<PIXI.Point | null>(null);
-
-  const renderTexture = useMemo(() => {
-    const rt = PIXI.RenderTexture.create(stageSize);
-    return rt;
-  }, []);
 
   const pointerMove: PIXI.FederatedEventHandler = useCallback(
     ({ global: { x, y } }) => {
       if (draggingRef.current) {
-        brush.position.set(x, y);
+        const point = new PIXI.Point(x, y);
+        const last = lastDrawnPointRef.current;
 
-        app.renderer.render(brush, {
-          renderTexture,
-          clear: false,
-          skipUpdateTransform: false,
-        });
+        onMove(point, last);
 
-        // Smooth out the drawing a little bit to make it look nicer
-        // this connects the previous drawn point to the current one
-        // using a line
-        if (lastDrawnPointRef.current) {
-          line
-            .clear()
-            .lineStyle({ width: 100, color: 0xffffff })
-            .moveTo(lastDrawnPointRef.current.x, lastDrawnPointRef.current.y)
-            .lineTo(x, y);
-
-          app.renderer.render(line, {
-            renderTexture,
-            clear: false,
-            skipUpdateTransform: false,
-          });
-        }
-
-        lastDrawnPointRef.current =
-          lastDrawnPointRef.current || new PIXI.Point();
+        lastDrawnPointRef.current = last || new PIXI.Point();
         lastDrawnPointRef.current.set(x, y);
       }
     },
-    [app, renderTexture]
+    [onMove]
   );
 
   const pointerDown: PIXI.FederatedEventHandler = useCallback(
-    (ev) => {
+    ({ global: { x, y } }) => {
       draggingRef.current = true;
-      pointerMove(ev);
+
+      const point = new PIXI.Point(x, y);
+
+      onMove(point, null);
+
+      lastDrawnPointRef.current = point;
     },
-    [pointerMove]
+    [onMove]
   );
 
   const pointerUp: PIXI.FederatedEventHandler = useCallback(() => {
     draggingRef.current = false;
     lastDrawnPointRef.current = null;
   }, []);
+
+  return {
+    pointerMove,
+    pointerDown,
+    pointerUp,
+  };
+}
+
+function PaintingLayer() {
+  const app = useApp();
+
+  const renderTexture = useMemo(() => {
+    return PIXI.RenderTexture.create(imageSize);
+  }, []);
+
+  const mouseMove = useCallback(
+    (point: PIXI.Point, last: PIXI.Point | null) => {
+      brush.position.set(point.x, point.y);
+
+      app.renderer.render(brush, {
+        renderTexture,
+        clear: false,
+        skipUpdateTransform: false,
+      });
+
+      // Smooth out the drawing a little bit to make it look nicer
+      // this connects the previous drawn point to the current one
+      // using a line
+      if (last) {
+        line
+          .clear()
+          .lineStyle({ width: 100, color: 0xffffff })
+          .moveTo(last.x, last.y)
+          .lineTo(point.x, point.y);
+
+        app.renderer.render(line, {
+          renderTexture,
+          clear: false,
+          skipUpdateTransform: false,
+        });
+      }
+    },
+    [app, renderTexture]
+  );
+
+  const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
+    onMove: mouseMove,
+  });
 
   return (
     <Sprite
@@ -84,16 +113,57 @@ function PaintingLayer() {
   );
 }
 
-export function ImageEditor() {
-  return (
-    <div>
-      <Stage width={800} height={600} options={{ backgroundColor: "#FF0000" }}>
-        <Sprite source="https://pixijs.com/assets/bg_grass.jpg" />
-        <PaintingLayer />
+export interface ImageEditorProps {
+  onSave: () => void;
+}
 
-        {/* <Sprite texture={renderTexture}></Sprite> */}
-        <Container x={200} y={200}>
-          <Text text="Hello World" anchor={0.5} x={220} y={150} />
+export function ImageEditor({ onSave }: ImageEditorProps) {
+  const [parentWidth, setParentWidth] = useState(0);
+  const [parentHeight, setParentHeight] = useState(0);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Function to update the parent div height
+    const updateParentHeight = () => {
+      if (!parentRef.current) {
+        return;
+      }
+
+      const width = parentRef.current.clientWidth;
+      const height = parentRef.current.clientHeight;
+
+      console.log("resize to", { width, height });
+
+      setParentWidth(width);
+      setParentHeight(height);
+    };
+
+    // Initial call to set parent height
+    updateParentHeight();
+
+    // Event listener for resize
+    window.addEventListener("resize", updateParentHeight);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", updateParentHeight);
+    };
+  }, []);
+
+  return (
+    <div className="w-full h-full overflow-hidden" ref={parentRef}>
+      <Stage
+        width={parentWidth}
+        height={parentHeight}
+        options={{
+          backgroundColor: "#202020",
+          width: parentWidth,
+          height: parentHeight,
+        }}
+      >
+        <Container x={0} y={0}>
+          <Sprite source="https://pixijs.com/assets/bg_grass.jpg" />
+          <PaintingLayer />
         </Container>
       </Stage>
     </div>

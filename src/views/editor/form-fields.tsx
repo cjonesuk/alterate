@@ -242,6 +242,10 @@ export function ImageFilenamesFormField({
 }: InputFormFieldProps<ImageFilenamesType>) {
   const [open, setOpen] = useDialogControl();
 
+  const save = useCallback(() => {
+    console.log("save");
+  }, []);
+
   return (
     <FormField
       control={form.control}
@@ -292,7 +296,7 @@ export function ImageFilenamesFormField({
                 </Button>
               </DialogTrigger>
               <DialogContent>
-                <ImageEditor />
+                <ImageEditor onSave={save} />
               </DialogContent>
             </Dialog>
           </FormItem>

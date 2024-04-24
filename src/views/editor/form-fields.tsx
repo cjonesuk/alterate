@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 
 import { useDropzone } from "react-dropzone";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useAlterateStore } from "@/lib/store";
 import { ImageReference } from "@/lib/comfyui/images";
 import { useDialogControl } from "@/lib/dialog-control";
@@ -35,6 +35,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { ImageEditor } from "../../components/image-editor/image-editor";
+import { ImageReferenceImage } from "./image-reference";
 
 export function StringFormField({
   definition,
@@ -200,8 +201,10 @@ export function StringValuesFormField({
 
 function ImageDropzone({
   onUploaded,
+  image,
 }: {
   onUploaded: (reference: ImageReference) => void;
+  image?: ImageReference | null | undefined;
 }) {
   const uploadImage = useAlterateStore((state) => state.uploadImage);
 
@@ -226,11 +229,17 @@ function ImageDropzone({
   return (
     <div
       {...getRootProps()}
-      className={`border-2 border-dashed ${borderColour} rounded p-4 text-center cursor-pointer`}
+      className={`flex flex-row max-h-56 border-2 border-dashed ${borderColour} rounded p-2 text-center cursor-pointer`}
     >
       <input {...getInputProps()} />
 
-      <p>Drag 'n' drop some files here, or click to select files</p>
+      {image && (
+        <div className="grow">
+          <ImageReferenceImage image={image} />
+        </div>
+      )}
+
+      {!image && <p>Drag 'n' drop some files here, or click to select files</p>}
     </div>
   );
 }
@@ -246,6 +255,16 @@ export function ImageFilenamesFormField({
     console.log("save");
   }, []);
 
+  const imageFilename: string | undefined = form.watch(input.fieldId);
+
+  const imageReference: ImageReference | null = useMemo(
+    () =>
+      imageFilename
+        ? { filename: imageFilename, subfolder: "", type: "input" }
+        : null,
+    [imageFilename]
+  );
+
   return (
     <FormField
       control={form.control}
@@ -254,51 +273,52 @@ export function ImageFilenamesFormField({
       render={({ field }) => {
         const appendEntry = !definition.values.includes(field.value);
         return (
-          <FormItem className="grid grid-cols-4 grid-rows-3 gap-1">
-            <FormLabel className="row-span-full">{definition.name}</FormLabel>
-            <Select
-              onValueChange={field.onChange}
-              defaultValue={field.value}
-              value={field.value}
-            >
-              <FormControl className="col-span-3">
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a file" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {definition.values.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-                {appendEntry && (
-                  <SelectItem key={field.value} value={field.value}>
-                    {field.value}
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <FormMessage />
+          <FormItem className="flex flex-row gap-1">
+            <FormLabel className="flex-1">{definition.name}</FormLabel>
+            <div className="flex flex-col gap-1">
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                value={field.value}
+              >
+                <FormControl className="flex-1">
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a file" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {definition.values.map((value) => (
+                    <SelectItem key={value} value={value}>
+                      {value}
+                    </SelectItem>
+                  ))}
+                  {appendEntry && (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.value}
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+              <FormMessage />
 
-            <div className="col-span-3">
               <ImageDropzone
                 onUploaded={(reference) => {
                   field.onChange(reference.filename);
                 }}
+                image={imageReference}
               />
-            </div>
 
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild>
-                <Button className="col-span-3" variant="secondary">
-                  Edit
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <ImageEditor onSave={save} />
-              </DialogContent>
-            </Dialog>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button className="" variant="secondary">
+                    Edit
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <ImageEditor onSave={save} />
+                </DialogContent>
+              </Dialog>
+            </div>
           </FormItem>
         );
       }}

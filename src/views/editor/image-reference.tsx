@@ -29,9 +29,8 @@ function useBlobObjectUrl(blob: Blob | null | undefined) {
   return { url };
 }
 
-export function ImageReferenceCard({ image }: Props) {
+export function useImageReferencePreview(image: ImageReference) {
   const connection = useAlterateStore((store) => store.backend.connection);
-  const acceptImage = useAlterateStore((store) => store.acceptImage);
 
   const { data } = useQuery({
     queryKey: ["image", image.filename, image.subfolder, image.type],
@@ -45,6 +44,49 @@ export function ImageReferenceCard({ image }: Props) {
     },
   });
 
+  return {
+    data,
+  };
+}
+
+export function ImageReferenceImage({ image }: Props) {
+  const { data } = useImageReferencePreview(image);
+  const { url } = useBlobObjectUrl(data);
+
+  if (!url) {
+    return null;
+  }
+
+  return (
+    <img
+      key={url}
+      src={url}
+      alt={image.filename}
+      className="rounded-md object-contain h-full w-full"
+    />
+  );
+}
+
+export function ImageReferencePreview({ image }: Props) {
+  const { data } = useImageReferencePreview(image);
+  const { url } = useBlobObjectUrl(data);
+
+  if (!url) {
+    return null;
+  }
+
+  return (
+    <div className="p-4 flex flex-col gap-2">
+      <ImageReferenceImage image={image} />
+      <img key={url} src={url} alt={image.filename} className="rounded-md" />
+    </div>
+  );
+}
+
+export function ImageReferenceCard({ image }: Props) {
+  const acceptImage = useAlterateStore((store) => store.acceptImage);
+
+  const { data } = useImageReferencePreview(image);
   const { url } = useBlobObjectUrl(data);
 
   if (!url) {

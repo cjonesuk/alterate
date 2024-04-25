@@ -26,7 +26,7 @@ export const createWorkspacePart: ImmerStateCreator<
       draft.workspace.definition = definition;
       draft.workspace.editors = makeEditors(
         definition.workflow,
-        nodeDefinitions
+        nodeDefinitions,
       );
     });
   },

@@ -1,8 +1,14 @@
 export interface ImageReference {
   filename: string;
   subfolder: string;
-  type: "input" | "temp" | "output";
+  type: "input" | "temp" | "output" | "invalid";
 }
+
+export const EmptyImageReference: ImageReference = {
+  filename: "",
+  subfolder: "",
+  type: "invalid",
+};
 
 export interface UploadImageResult {
   name: string;

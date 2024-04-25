@@ -29,7 +29,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import { useCallback, useMemo } from "react";
 import { useAlterateStore } from "@/lib/store";
-import { ImageReference } from "@/lib/comfyui/images";
+import { EmptyImageReference, ImageReference } from "@/lib/comfyui/images";
 import { useDialogControl } from "@/lib/dialog-control";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogTrigger } from "@radix-ui/react-dialog";
@@ -314,8 +314,11 @@ export function ImageFilenamesFormField({
                     Edit
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
-                  <ImageEditor onSave={save} />
+                <DialogContent className="w-full h-full max-w-full max-h-full">
+                  <ImageEditor
+                    onSave={save}
+                    imageReference={imageReference ?? EmptyImageReference}
+                  />
                 </DialogContent>
               </Dialog>
             </div>

@@ -1,6 +1,10 @@
+import { useBlobObjectUrl } from "@/lib/blob";
+import { ImageReference } from "@/lib/comfyui/images";
+import { useImageReferenceQuery } from "@/lib/image-query";
 import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Button } from "../ui/button";
 
 const imageSize = { width: 800, height: 600 };
 
@@ -115,12 +119,16 @@ function PaintingLayer() {
 
 export interface ImageEditorProps {
   onSave: () => void;
+  imageReference: ImageReference;
 }
 
-export function ImageEditor({ onSave }: ImageEditorProps) {
+export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const [parentWidth, setParentWidth] = useState(0);
   const [parentHeight, setParentHeight] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
+
+  const { data } = useImageReferenceQuery(imageReference);
+  const { url } = useBlobObjectUrl(data);
 
   useEffect(() => {
     // Function to update the parent div height
@@ -151,21 +159,26 @@ export function ImageEditor({ onSave }: ImageEditorProps) {
   }, []);
 
   return (
-    <div className="w-full h-full overflow-hidden" ref={parentRef}>
-      <Stage
-        width={parentWidth}
-        height={parentHeight}
-        options={{
-          backgroundColor: "#202020",
-          width: parentWidth,
-          height: parentHeight,
-        }}
-      >
-        <Container x={0} y={0}>
-          <Sprite source="https://pixijs.com/assets/bg_grass.jpg" />
-          <PaintingLayer />
-        </Container>
-      </Stage>
+    <div className="flex flex-row">
+      <div className="w-full h-full overflow-hidden" ref={parentRef}>
+        <Stage
+          width={parentWidth}
+          height={parentHeight}
+          options={{
+            backgroundColor: "#202020",
+            width: parentWidth,
+            height: parentHeight,
+          }}
+        >
+          <Container x={0} y={0}>
+            {url && <Sprite source={url} />}
+            <PaintingLayer />
+          </Container>
+        </Stage>
+      </div>
+      <div className="flex flex-col gap-4 p-4">
+        <Button onClick={onSave}>Save</Button>
+      </div>
     </div>
   );
 }

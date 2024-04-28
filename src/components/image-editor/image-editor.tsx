@@ -5,6 +5,7 @@ import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
+import { Viewport } from "./viewport";
 
 const imageSize = { width: 800, height: 600 };
 
@@ -36,7 +37,7 @@ function useMouseFlow({ onMove }: UseMouseFlowInput) {
         lastDrawnPointRef.current.set(x, y);
       }
     },
-    [onMove]
+    [onMove],
   );
 
   const pointerDown: PIXI.FederatedEventHandler = useCallback(
@@ -49,7 +50,7 @@ function useMouseFlow({ onMove }: UseMouseFlowInput) {
 
       lastDrawnPointRef.current = point;
     },
-    [onMove]
+    [onMove],
   );
 
   const pointerUp: PIXI.FederatedEventHandler = useCallback(() => {
@@ -98,7 +99,7 @@ function PaintingLayer() {
         });
       }
     },
-    [app, renderTexture]
+    [app, renderTexture],
   );
 
   const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
@@ -130,6 +131,10 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const { data } = useImageReferenceQuery(imageReference);
   const { url } = useBlobObjectUrl(data);
 
+  const texture = useMemo(() => {
+    return url ? PIXI.Texture.from(url) : null;
+  }, [url]);
+
   useEffect(() => {
     // Function to update the parent div height
     const updateParentHeight = () => {
@@ -158,23 +163,29 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
     };
   }, []);
 
+  const ready = parentWidth > 0 && parentHeight > 0;
+
   return (
     <div className="flex flex-row">
       <div className="w-full h-full overflow-hidden" ref={parentRef}>
-        <Stage
-          width={parentWidth}
-          height={parentHeight}
-          options={{
-            backgroundColor: "#202020",
-            width: parentWidth,
-            height: parentHeight,
-          }}
-        >
-          <Container x={0} y={0}>
-            {url && <Sprite source={url} />}
-            <PaintingLayer />
-          </Container>
-        </Stage>
+        {ready && (
+          <Stage
+            width={parentWidth}
+            height={parentHeight}
+            options={{
+              backgroundColor: "#202020",
+              width: parentWidth,
+              height: parentHeight,
+            }}
+          >
+            <Viewport width={parentWidth} height={parentHeight}>
+              <Container x={0} y={0}>
+                {texture && <Sprite texture={texture} />}
+                {/*  <PaintingLayer /> */}
+              </Container>
+            </Viewport>
+          </Stage>
+        )}
       </div>
       <div className="flex flex-col gap-4 p-4">
         <Button onClick={onSave}>Save</Button>

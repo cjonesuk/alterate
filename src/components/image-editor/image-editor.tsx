@@ -1,13 +1,11 @@
-import { useBlobObjectUrl } from "@/lib/blob";
 import { ImageReference } from "@/lib/comfyui/images";
-import { useImageReferenceQuery } from "@/lib/image-query";
 import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { Viewport, useViewport } from "./viewport";
-
-const imageSize = { width: 800, height: 600 };
+import { useImageReferenceQuery } from "@/lib/image-query";
+import { useBlobObjectUrl } from "@/lib/blob";
 
 const brush = new PIXI.Graphics()
   .beginFill(0xffffff)
@@ -72,12 +70,15 @@ function useMouseFlow({ onMove }: UseMouseFlowInput) {
   };
 }
 
-function PaintingLayer() {
+function PaintingLayer({ texture }: { texture: PIXI.Texture }) {
   const app = useApp();
 
   const renderTexture = useMemo(() => {
-    return PIXI.RenderTexture.create(imageSize);
-  }, []);
+    return PIXI.RenderTexture.create({
+      width: texture.width,
+      height: texture.height,
+    });
+  }, [texture]);
 
   const mouseMove = useCallback(
     (point: PIXI.Point, last: PIXI.Point | null) => {
@@ -135,11 +136,24 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const [parentHeight, setParentHeight] = useState(0);
   const parentRef = useRef<HTMLDivElement>(null);
 
-  const { data } = useImageReferenceQuery(imageReference);
-  const { url } = useBlobObjectUrl(data);
+  const result = useImageReferenceQuery(imageReference);
+  const { url } = useBlobObjectUrl(result.data);
 
-  const texture = useMemo(() => {
-    return url ? PIXI.Texture.from(url) : null;
+  const [texture, setTexture] = useState<PIXI.Texture | null>(null);
+
+  useEffect(() => {
+    if (!url) {
+      return;
+    }
+
+    const texture = PIXI.Texture.from(url);
+    texture.on("update", () => {
+      console.log("loaded", { valid: texture.valid });
+
+      if (texture.valid) {
+        setTexture(texture);
+      }
+    });
   }, [url]);
 
   useEffect(() => {
@@ -180,16 +194,19 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
             width={parentWidth}
             height={parentHeight}
             options={{
-              backgroundColor: "#202020",
+              backgroundColor: 0x202020,
               width: parentWidth,
               height: parentHeight,
+              hello: true,
             }}
           >
             <Viewport width={parentWidth} height={parentHeight}>
-              <Container x={0} y={0}>
-                {texture && <Sprite texture={texture} />}
-                <PaintingLayer />
-              </Container>
+              {texture && (
+                <Container x={0} y={0}>
+                  <Sprite texture={texture} />
+                  <PaintingLayer texture={texture} />
+                </Container>
+              )}
             </Viewport>
           </Stage>
         )}

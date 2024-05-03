@@ -30,7 +30,6 @@ export const Viewport = (props: ViewportProps) => {
   const { events } = app.renderer;
 
   const viewport = React.useMemo(() => {
-    console.log("creating viewport");
     const v = new PixiViewport({
       screenWidth: width,
       screenHeight: height,
@@ -52,7 +51,6 @@ export const Viewport = (props: ViewportProps) => {
     return v;
   }, [width, height, ticker, events]);
 
-  console.log("rendering viewport");
   return (
     <ViewportContext.Provider value={viewport}>
       <PixiComponentViewport app={app} viewport={viewport} {...props} />
@@ -62,7 +60,7 @@ export const Viewport = (props: ViewportProps) => {
 
 export const useViewport = () => {
   const viewport = React.useContext(ViewportContext);
-  console.log("useViewport", viewport);
+
   if (!viewport) {
     throw new Error("useViewport must be used within a ViewportProvider");
   }

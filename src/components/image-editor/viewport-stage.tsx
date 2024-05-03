@@ -2,30 +2,32 @@ import { Stage } from "@pixi/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Viewport } from "./viewport";
 
+type ViewportSize = {
+  width: number;
+  height: number;
+};
+
 interface Props {
   children: React.ReactNode | React.ReactNode[];
 }
 
 export function ViewportStage({ children }: Props) {
-  const [parentSize, setParentSize] = useState<{
-    width: number;
-    height: number;
-  } | null>(null);
-  const parentRef = useRef<HTMLDivElement>(null);
+  const [viewportSize, setViewportSize] = useState<ViewportSize | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const updateParentSize = useCallback(() => {
-    if (!parentRef.current) {
+    if (!containerRef.current) {
       return;
     }
 
     const size = {
-      width: parentRef.current.clientWidth,
-      height: parentRef.current.clientHeight,
+      width: containerRef.current.clientWidth,
+      height: containerRef.current.clientHeight,
     };
 
-    console.log("resize to", size);
-    setParentSize(size);
-  }, [setParentSize]);
+    console.log("Viewport resize to", size);
+    setViewportSize(size);
+  }, [setViewportSize]);
 
   useEffect(() => {
     // Initial call to set parent height
@@ -40,22 +42,22 @@ export function ViewportStage({ children }: Props) {
     };
   }, [updateParentSize]);
 
-  const ready = parentSize !== null;
+  const ready = viewportSize !== null;
 
   return (
-    <div className="w-full h-full overflow-hidden" ref={parentRef}>
+    <div className="w-full h-full overflow-hidden" ref={containerRef}>
       {ready && (
         <Stage
-          width={parentSize.width}
-          height={parentSize.height}
+          width={viewportSize.width}
+          height={viewportSize.height}
           options={{
             backgroundColor: 0x202020,
-            width: parentSize.width,
-            height: parentSize.height,
+            width: viewportSize.width,
+            height: viewportSize.height,
             hello: true,
           }}
         >
-          <Viewport width={parentSize.width} height={parentSize.height}>
+          <Viewport width={viewportSize.width} height={viewportSize.height}>
             {children}
           </Viewport>
         </Stage>

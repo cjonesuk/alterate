@@ -1,11 +1,12 @@
 import * as PIXI from "pixi.js";
 import { useCallback, useRef } from "react";
 import { useViewport } from "./viewport";
-export interface UseMouseFlowInput {
+
+interface Input {
   onMove: (point: PIXI.Point, last: PIXI.Point | null) => void;
 }
 
-export function useMouseFlow({ onMove }: UseMouseFlowInput) {
+export function useMouseFlow({ onMove }: Input) {
   const draggingRef = useRef(false);
   const lastDrawnPointRef = useRef<PIXI.Point | null>(null);
   const viewport = useViewport();

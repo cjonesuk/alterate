@@ -5,7 +5,7 @@ import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { Viewport } from "./viewport";
+import { Viewport, useViewport } from "./viewport";
 
 const imageSize = { width: 800, height: 600 };
 
@@ -24,33 +24,40 @@ interface UseMouseFlowInput {
 function useMouseFlow({ onMove }: UseMouseFlowInput) {
   const draggingRef = useRef(false);
   const lastDrawnPointRef = useRef<PIXI.Point | null>(null);
+  const viewport = useViewport();
 
   const pointerMove: PIXI.FederatedEventHandler = useCallback(
     ({ global: { x, y } }) => {
       if (draggingRef.current) {
-        const point = new PIXI.Point(x, y);
+        const viewportPoint = new PIXI.Point(x, y);
+        const point = viewport.toWorld(viewportPoint.x, viewportPoint.y);
         const last = lastDrawnPointRef.current;
 
         onMove(point, last);
 
         lastDrawnPointRef.current = last || new PIXI.Point();
-        lastDrawnPointRef.current.set(x, y);
+        lastDrawnPointRef.current.set(point.x, point.y);
       }
     },
-    [onMove],
+    [onMove, viewport]
   );
 
   const pointerDown: PIXI.FederatedEventHandler = useCallback(
-    ({ global: { x, y } }) => {
+    ({ global: { x, y }, ctrlKey }) => {
+      if (ctrlKey) {
+        return;
+      }
+
       draggingRef.current = true;
 
-      const point = new PIXI.Point(x, y);
+      const viewportPoint = new PIXI.Point(x, y);
+      const point = viewport.toWorld(viewportPoint.x, viewportPoint.y);
 
       onMove(point, null);
 
       lastDrawnPointRef.current = point;
     },
-    [onMove],
+    [onMove, viewport]
   );
 
   const pointerUp: PIXI.FederatedEventHandler = useCallback(() => {
@@ -99,7 +106,7 @@ function PaintingLayer() {
         });
       }
     },
-    [app, renderTexture],
+    [app, renderTexture]
   );
 
   const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
@@ -181,7 +188,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
             <Viewport width={parentWidth} height={parentHeight}>
               <Container x={0} y={0}>
                 {texture && <Sprite texture={texture} />}
-                {/*  <PaintingLayer /> */}
+                <PaintingLayer />
               </Container>
             </Viewport>
           </Stage>

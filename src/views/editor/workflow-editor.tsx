@@ -12,7 +12,6 @@ import { ImageReferenceCard } from "./image-reference";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { BackendSelectionView } from "../backends/backend-selection";
 import { WorkflowSelectionView } from "../workflows/workflow-selection";
-import { ImageEditor } from "../../components/image-editor/image-editor";
 
 export function WorkflowEditorView() {
   const connected = useAlterateStore(
@@ -30,7 +29,6 @@ export function WorkflowEditorView() {
   const { form, submit } = useWorkflowEditorForm();
 
   if (!connected) {
-    //return <ImageEditor onSave={() => console.log("save")} />;
     return <BackendSelectionView />;
   }
 

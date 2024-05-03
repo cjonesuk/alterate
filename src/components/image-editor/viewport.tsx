@@ -11,20 +11,27 @@ export interface ViewportProps {
 
 export interface PixiComponentViewportProps extends ViewportProps {
   app: PIXI.Application;
+  viewport: PixiViewport;
 }
 
 const PixiComponentViewport = PixiComponent("Viewport", {
   create: (props: PixiComponentViewportProps) => {
-    // Install EventSystem, if not already
-    // (PixiJS 6 doesn't add it by default)
-    if (!("events" in props.app.renderer))
-      props.app.renderer.addSystem(PIXI.EventSystem, "events");
+    const { viewport } = props;
+    return viewport;
+  },
+});
 
-    const { width, height } = props;
-    const { ticker } = props.app;
-    const { events } = props.app.renderer;
+const ViewportContext = React.createContext<PixiViewport | null>(null);
 
-    const viewport = new PixiViewport({
+export const Viewport = (props: ViewportProps) => {
+  const app = useApp();
+  const { width, height } = props;
+  const { ticker } = app;
+  const { events } = app.renderer;
+
+  const viewport = React.useMemo(() => {
+    console.log("creating viewport");
+    const v = new PixiViewport({
       screenWidth: width,
       screenHeight: height,
       worldWidth: width,
@@ -33,21 +40,31 @@ const PixiComponentViewport = PixiComponent("Viewport", {
       events: events,
     });
 
-    viewport
-      .drag()
+    v.drag({
+      keyToPress: ["ControlLeft", "ControlRight"],
+    })
       .pinch()
       .wheel()
       //.clamp({ direction: "all" })
       .clampZoom({ minScale: 0.1, maxScale: 4 });
     //.decelerate();
 
-    return viewport;
-  },
-});
+    return v;
+  }, [width, height, ticker, events]);
 
-const Viewport = (props: ViewportProps) => {
-  const app = useApp();
-  return <PixiComponentViewport app={app} {...props} />;
+  console.log("rendering viewport");
+  return (
+    <ViewportContext.Provider value={viewport}>
+      <PixiComponentViewport app={app} viewport={viewport} {...props} />
+    </ViewportContext.Provider>
+  );
 };
 
-export { Viewport };
+export const useViewport = () => {
+  const viewport = React.useContext(ViewportContext);
+  console.log("useViewport", viewport);
+  if (!viewport) {
+    throw new Error("useViewport must be used within a ViewportProvider");
+  }
+  return viewport;
+};

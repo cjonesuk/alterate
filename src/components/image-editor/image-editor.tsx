@@ -3,9 +3,10 @@ import { Stage, Container, Sprite, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { Viewport, useViewport } from "./viewport";
+import { Viewport } from "./viewport";
 import { useImageReferenceQuery } from "@/lib/image-query";
 import { useBlobObjectUrl } from "@/lib/blob";
+import { useMouseFlow } from "./hooks";
 
 const brush = new PIXI.Graphics()
   .beginFill(0xffffff)
@@ -14,61 +15,6 @@ const brush = new PIXI.Graphics()
 
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
-
-interface UseMouseFlowInput {
-  onMove: (point: PIXI.Point, last: PIXI.Point | null) => void;
-}
-
-function useMouseFlow({ onMove }: UseMouseFlowInput) {
-  const draggingRef = useRef(false);
-  const lastDrawnPointRef = useRef<PIXI.Point | null>(null);
-  const viewport = useViewport();
-
-  const pointerMove: PIXI.FederatedEventHandler = useCallback(
-    ({ global: { x, y } }) => {
-      if (draggingRef.current) {
-        const viewportPoint = new PIXI.Point(x, y);
-        const point = viewport.toWorld(viewportPoint.x, viewportPoint.y);
-        const last = lastDrawnPointRef.current;
-
-        onMove(point, last);
-
-        lastDrawnPointRef.current = last || new PIXI.Point();
-        lastDrawnPointRef.current.set(point.x, point.y);
-      }
-    },
-    [onMove, viewport]
-  );
-
-  const pointerDown: PIXI.FederatedEventHandler = useCallback(
-    ({ global: { x, y }, ctrlKey }) => {
-      if (ctrlKey) {
-        return;
-      }
-
-      draggingRef.current = true;
-
-      const viewportPoint = new PIXI.Point(x, y);
-      const point = viewport.toWorld(viewportPoint.x, viewportPoint.y);
-
-      onMove(point, null);
-
-      lastDrawnPointRef.current = point;
-    },
-    [onMove, viewport]
-  );
-
-  const pointerUp: PIXI.FederatedEventHandler = useCallback(() => {
-    draggingRef.current = false;
-    lastDrawnPointRef.current = null;
-  }, []);
-
-  return {
-    pointerMove,
-    pointerDown,
-    pointerUp,
-  };
-}
 
 function PaintingLayer({ texture }: { texture: PIXI.Texture }) {
   const app = useApp();
@@ -126,16 +72,74 @@ function PaintingLayer({ texture }: { texture: PIXI.Texture }) {
   );
 }
 
+interface ViewportStageProps {
+  children: React.ReactNode | React.ReactNode[];
+}
+
+function ViewportStage({ children }: ViewportStageProps) {
+  const [parentSize, setParentSize] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const parentRef = useRef<HTMLDivElement>(null);
+
+  const updateParentSize = useCallback(() => {
+    if (!parentRef.current) {
+      return;
+    }
+
+    const size = {
+      width: parentRef.current.clientWidth,
+      height: parentRef.current.clientHeight,
+    };
+
+    console.log("resize to", size);
+    setParentSize(size);
+  }, [setParentSize]);
+
+  useEffect(() => {
+    // Initial call to set parent height
+    updateParentSize();
+
+    // Event listener for resize
+    window.addEventListener("resize", updateParentSize);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("resize", updateParentSize);
+    };
+  }, [updateParentSize]);
+
+  const ready = parentSize !== null;
+
+  return (
+    <div className="w-full h-full overflow-hidden" ref={parentRef}>
+      {ready && (
+        <Stage
+          width={parentSize.width}
+          height={parentSize.height}
+          options={{
+            backgroundColor: 0x202020,
+            width: parentSize.width,
+            height: parentSize.height,
+            hello: true,
+          }}
+        >
+          <Viewport width={parentSize.width} height={parentSize.height}>
+            {children}
+          </Viewport>
+        </Stage>
+      )}
+    </div>
+  );
+}
+
 export interface ImageEditorProps {
   onSave: () => void;
   imageReference: ImageReference;
 }
 
 export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
-  const [parentWidth, setParentWidth] = useState(0);
-  const [parentHeight, setParentHeight] = useState(0);
-  const parentRef = useRef<HTMLDivElement>(null);
-
   const result = useImageReferenceQuery(imageReference);
   const { url } = useBlobObjectUrl(result.data);
 
@@ -156,61 +160,16 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
     });
   }, [url]);
 
-  useEffect(() => {
-    // Function to update the parent div height
-    const updateParentHeight = () => {
-      if (!parentRef.current) {
-        return;
-      }
-
-      const width = parentRef.current.clientWidth;
-      const height = parentRef.current.clientHeight;
-
-      console.log("resize to", { width, height });
-
-      setParentWidth(width);
-      setParentHeight(height);
-    };
-
-    // Initial call to set parent height
-    updateParentHeight();
-
-    // Event listener for resize
-    window.addEventListener("resize", updateParentHeight);
-
-    // Cleanup
-    return () => {
-      window.removeEventListener("resize", updateParentHeight);
-    };
-  }, []);
-
-  const ready = parentWidth > 0 && parentHeight > 0;
-
   return (
     <div className="flex flex-row">
-      <div className="w-full h-full overflow-hidden" ref={parentRef}>
-        {ready && (
-          <Stage
-            width={parentWidth}
-            height={parentHeight}
-            options={{
-              backgroundColor: 0x202020,
-              width: parentWidth,
-              height: parentHeight,
-              hello: true,
-            }}
-          >
-            <Viewport width={parentWidth} height={parentHeight}>
-              {texture && (
-                <Container x={0} y={0}>
-                  <Sprite texture={texture} />
-                  <PaintingLayer texture={texture} />
-                </Container>
-              )}
-            </Viewport>
-          </Stage>
+      <ViewportStage>
+        {texture && (
+          <Container x={0} y={0}>
+            <Sprite texture={texture} />
+            <PaintingLayer texture={texture} />
+          </Container>
         )}
-      </div>
+      </ViewportStage>
       <div className="flex flex-col gap-4 p-4">
         <Button onClick={onSave}>Save</Button>
       </div>

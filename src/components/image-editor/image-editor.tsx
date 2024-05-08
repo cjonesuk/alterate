@@ -1,41 +1,47 @@
 import { ImageReference } from "@/lib/comfyui/images";
-import { Container, Sprite, Stage, useApp, withPixiApp } from "@pixi/react";
+import { Container, Sprite, Stage, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
 import { useImageReferenceQuery } from "@/lib/image-query";
 import { useBlobObjectUrl } from "@/lib/blob";
 import { useMouseFlow } from "./hooks";
-import { ViewportStage } from "./viewport-stage";
 import { Viewport } from "./viewport";
-import { render } from "react-dom";
-
-const color = 0x0000ff;
-
-const brush = new PIXI.Graphics()
-  .beginFill(color)
-  .drawCircle(0, 0, 50)
-  .endFill();
 
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
 
 interface PaintingLayerProps {
   mask: PIXI.RenderTexture;
+  brushColor: number;
+  brushSize: number;
 }
 
-function PaintingLayer({ mask }: PaintingLayerProps) {
+function PaintingLayer({ mask, brushColor, brushSize }: PaintingLayerProps) {
   const app = useApp();
+
+  const { brush, lineStyle } = useMemo(() => {
+    const brush = new PIXI.Graphics()
+      .beginFill(brushColor)
+      .drawCircle(0, 0, brushSize)
+      .endFill();
+
+    const lineStyle = { width: brushSize * 2, color: brushColor };
+
+    return { brush, lineStyle };
+  }, [brushColor, brushSize]);
 
   const mouseMove = useCallback(
     (point: PIXI.Point, last: PIXI.Point | null) => {
       brush.position.set(point.x, point.y);
 
-      app.renderer.render(brush, {
+      const renderOptions = {
         renderTexture: mask,
         clear: false,
         skipUpdateTransform: false,
-      });
+      };
+
+      app.renderer.render(brush, renderOptions);
 
       // Smooth out the drawing a little bit to make it look nicer
       // this connects the previous drawn point to the current one
@@ -43,18 +49,14 @@ function PaintingLayer({ mask }: PaintingLayerProps) {
       if (last) {
         line
           .clear()
-          .lineStyle({ width: 100, color: color })
+          .lineStyle(lineStyle)
           .moveTo(last.x, last.y)
           .lineTo(point.x, point.y);
 
-        app.renderer.render(line, {
-          renderTexture: mask,
-          clear: false,
-          skipUpdateTransform: false,
-        });
+        app.renderer.render(line, renderOptions);
       }
     },
-    [app, mask]
+    [app, mask, brush, lineStyle]
   );
 
   const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
@@ -106,6 +108,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
     });
   }, [url]);
 
+  // destroy the texture when we're done?
   const renderTexture = useMemo(() => {
     if (!texture) {
       return null;
@@ -179,7 +182,6 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       new PIXI.Rectangle(0, 0, texture.width, texture.height)
     );
     window.open(d, "_blank");
-    console.log("data", d);
   }, [texture, renderTexture, app]);
 
   return (
@@ -201,7 +203,11 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
               {texture && renderTexture && (
                 <Container x={0} y={0}>
                   <Sprite texture={texture} />
-                  <PaintingLayer mask={renderTexture} />
+                  <PaintingLayer
+                    mask={renderTexture}
+                    brushSize={100}
+                    brushColor={0x0f00ff}
+                  />
                 </Container>
               )}
             </Viewport>

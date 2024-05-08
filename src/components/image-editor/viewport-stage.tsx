@@ -12,6 +12,7 @@ interface Props {
   children: React.ReactNode | React.ReactNode[];
 }
 
+// todo: remove or refactor?
 export function ViewportStage({ children }: Props) {
   const [viewportSize, setViewportSize] = useState<ViewportSize | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);

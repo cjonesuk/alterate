@@ -89,7 +89,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
 
   const [texture, setTexture] = useState<PIXI.Texture | null>(null);
 
-  const thingRef = useRef<Stage>(null);
+  const [app, setApp] = useState<PIXI.Application | null>(null);
 
   useEffect(() => {
     if (!url) {
@@ -160,54 +160,34 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       return;
     }
 
-    if (!thingRef.current) {
-      console.log("No thingRef");
+    if (!app) {
+      console.log("No app");
       return;
     }
 
-    console.log("Save");
+    const backgroundSprite = new PIXI.Sprite(texture);
+    const maskSprite = new PIXI.Sprite(renderTexture);
 
-    // Create a renderer
-    const renderer = PIXI.autoDetectRenderer({
-      width: texture.width,
-      height: texture.height,
-      backgroundColor: 0x000000,
-      backgroundAlpha: 1,
-    });
-
-    console.log("renderer", { renderer, renderTexture });
-
-    const bg = new PIXI.Graphics()
-      .beginFill(0xde3249)
-      .drawRect(0, 0, texture.width, texture.height)
-      .endFill();
-    // const background = new PIXI.Sprite(texture);
-    // background.x = 100;
     const container = new PIXI.Container();
-    container.addChild(bg);
-    const sprite = new PIXI.Sprite(renderTexture);
-    container.addChild(sprite);
+    container.addChild(backgroundSprite);
+    container.addChild(maskSprite);
 
-    const rt = renderer.generateTexture(container, {
-      width: texture.width,
-      height: texture.height,
-    });
-
-    rt.on("update", (a) => {
-      console.log("update", a);
-    });
-
-    const d = await renderer.extract.base64(rt);
+    const d = await app.renderer.extract.base64(
+      container,
+      "image/png",
+      0.92,
+      new PIXI.Rectangle(0, 0, texture.width, texture.height)
+    );
     window.open(d, "_blank");
     console.log("data", d);
-  }, [texture, renderTexture]);
+  }, [texture, renderTexture, app]);
 
   return (
     <div className="flex flex-row">
       <div className="w-full h-full overflow-hidden" ref={containerRef}>
         {ready && (
           <Stage
-            ref={thingRef}
+            onMount={setApp}
             width={viewportSize.width}
             height={viewportSize.height}
             options={{

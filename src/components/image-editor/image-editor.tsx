@@ -132,21 +132,30 @@ function MaskingLayer({
   const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
     onMove: mouseMove,
   });
-
-  const { masking, filters } = useMemo(() => {
+  const { filters } = useMemo(() => {
     const negativeFilter = new PIXI.ColorMatrixFilter();
     negativeFilter.negative(false);
-    const masking = new PIXI.Sprite(mask);
 
-    return { masking, filters: [negativeFilter] };
-  }, [mask]);
+    return { filters: [negativeFilter] };
+  }, []);
+
+  // const { masking, filters } = useMemo(() => {
+  //   const negativeFilter = new PIXI.ColorMatrixFilter();
+  //   negativeFilter.negative(false);
+  //  // const masking = new PIXI.Sprite(mask);
+
+  //   return { masking, filters: [negativeFilter] };
+  // }, [mask]);
+
+  const maskRef = useRef<PIXI.Sprite>(null);
 
   return (
-    <Container x={0} y={0}>
+    <Container>
+      <Sprite texture={mask} renderable={false} ref={maskRef} />
       <Sprite
         interactive={true}
         texture={image}
-        mask={masking}
+        mask={maskRef.current}
         filters={filters}
         onpointerdown={pointerDown}
         onpointerup={pointerUp}

@@ -75,6 +75,88 @@ function PaintingLayer({ mask, brushColor, brushSize }: PaintingLayerProps) {
   );
 }
 
+interface MaskingLayerProps {
+  image: PIXI.Texture;
+  mask: PIXI.RenderTexture;
+  brushColor: number;
+  brushSize: number;
+}
+
+function MaskingLayer({
+  image,
+  mask,
+  brushColor,
+  brushSize,
+}: MaskingLayerProps) {
+  const app = useApp();
+
+  const { brush, lineStyle } = useMemo(() => {
+    const brush = new PIXI.Graphics()
+      .beginFill(brushColor)
+      .drawCircle(0, 0, brushSize)
+      .endFill();
+
+    const lineStyle = { width: brushSize * 2, color: brushColor };
+
+    return { brush, lineStyle };
+  }, [brushColor, brushSize]);
+
+  const mouseMove = useCallback(
+    (point: PIXI.Point, last: PIXI.Point | null) => {
+      brush.position.set(point.x, point.y);
+
+      const renderOptions = {
+        renderTexture: mask,
+        clear: false,
+        skipUpdateTransform: false,
+      };
+
+      app.renderer.render(brush, renderOptions);
+
+      // Smooth out the drawing a little bit to make it look nicer
+      // this connects the previous drawn point to the current one
+      // using a line
+      if (last) {
+        line
+          .clear()
+          .lineStyle(lineStyle)
+          .moveTo(last.x, last.y)
+          .lineTo(point.x, point.y);
+
+        app.renderer.render(line, renderOptions);
+      }
+    },
+    [app, mask, brush, lineStyle]
+  );
+
+  const { pointerDown, pointerMove, pointerUp } = useMouseFlow({
+    onMove: mouseMove,
+  });
+
+  const { masking, filters } = useMemo(() => {
+    const negativeFilter = new PIXI.ColorMatrixFilter();
+    negativeFilter.negative(false);
+    const masking = new PIXI.Sprite(mask);
+
+    return { masking, filters: [negativeFilter] };
+  }, [mask]);
+
+  return (
+    <Container x={0} y={0}>
+      <Sprite
+        interactive={true}
+        texture={image}
+        mask={masking}
+        filters={filters}
+        onpointerdown={pointerDown}
+        onpointerup={pointerUp}
+        pointerupoutside={pointerUp}
+        pointermove={pointerMove}
+      />
+    </Container>
+  );
+}
+
 export interface ImageEditorProps {
   onSave: () => void;
   imageReference: ImageReference;
@@ -203,10 +285,11 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
               {texture && renderTexture && (
                 <Container x={0} y={0}>
                   <Sprite texture={texture} />
-                  <PaintingLayer
+                  <MaskingLayer
+                    image={texture}
                     mask={renderTexture}
-                    brushSize={100}
-                    brushColor={0x0f00ff}
+                    brushSize={50}
+                    brushColor={0xffffff}
                   />
                 </Container>
               )}

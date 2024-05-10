@@ -180,7 +180,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const result = useImageReferenceQuery(imageReference);
   const { url } = useBlobObjectUrl(result.data);
 
-  const [texture, setTexture] = useState<PIXI.Texture | null>(null);
+  const [imageTexture, setTexture] = useState<PIXI.Texture | null>(null);
 
   const [app, setApp] = useState<PIXI.Application | null>(null);
 
@@ -200,16 +200,17 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   }, [url]);
 
   // destroy the texture when we're done?
-  const renderTexture = useMemo(() => {
-    if (!texture) {
+  const maskTexture = useMemo(() => {
+    if (!imageTexture) {
       return null;
     }
 
     return PIXI.RenderTexture.create({
-      width: texture.width,
-      height: texture.height,
+      width: imageTexture.width,
+      height: imageTexture.height,
+      format: PIXI.FORMATS.RGBA,
     });
-  }, [texture]);
+  }, [imageTexture]);
 
   const [viewportSize, setViewportSize] = useState<ViewportSize | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -244,12 +245,12 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const ready = viewportSize !== null;
 
   const handleSave = useCallback(async () => {
-    if (!texture) {
+    if (!imageTexture) {
       console.log("No texture");
       return;
     }
 
-    if (!renderTexture) {
+    if (!maskTexture) {
       console.log("No render texture");
       return;
     }
@@ -259,21 +260,63 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       return;
     }
 
-    const backgroundSprite = new PIXI.Sprite(texture);
-    const maskSprite = new PIXI.Sprite(renderTexture);
+    const maskSprite = new PIXI.Sprite(maskTexture);
 
-    const container = new PIXI.Container();
-    container.addChild(backgroundSprite);
-    container.addChild(maskSprite);
-
-    const d = await app.renderer.extract.base64(
-      container,
+    const alphaImageDataElement = await app.renderer.extract.image(
+      maskSprite,
       "image/png",
       0.92,
-      new PIXI.Rectangle(0, 0, texture.width, texture.height)
+      new PIXI.Rectangle(0, 0, imageTexture.width, imageTexture.height)
     );
-    window.open(d, "_blank");
-  }, [texture, renderTexture, app]);
+
+    const backupCanvas = document.createElement("canvas");
+    const backupCtx = backupCanvas.getContext("2d", {
+      willReadFrequently: true,
+    });
+
+    if (!backupCtx) {
+      throw new Error("No context");
+    }
+
+    backupCanvas.width = imageTexture.width;
+    backupCanvas.height = imageTexture.height;
+
+    backupCtx.clearRect(0, 0, backupCanvas.width, backupCanvas.height);
+    backupCtx.drawImage(
+      alphaImageDataElement,
+      0,
+      0,
+      imageTexture.width,
+      imageTexture.height,
+      0,
+      0,
+      backupCanvas.width,
+      backupCanvas.height
+    );
+
+    // paste mask data into alpha channel
+    const backupData = backupCtx.getImageData(
+      0,
+      0,
+      backupCanvas.width,
+      backupCanvas.height
+    );
+
+    for (let i = 0; i < backupData.data.length; i += 4) {
+      if (backupData.data[i + 3] == 255) backupData.data[i + 3] = 0;
+      else backupData.data[i + 3] = 255;
+
+      backupData.data[i] = 0;
+      backupData.data[i + 1] = 0;
+      backupData.data[i + 2] = 0;
+    }
+
+    backupCtx.globalCompositeOperation = "source-over";
+    backupCtx.putImageData(backupData, 0, 0);
+
+    const dataURL = backupCanvas.toDataURL();
+    window.open(dataURL, "_blank");
+  }, [imageTexture, maskTexture, app]);
 
   return (
     <div className="flex flex-row">
@@ -288,15 +331,16 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
               width: viewportSize.width,
               height: viewportSize.height,
               hello: true,
+              backgroundAlpha: 0,
             }}
           >
             <Viewport width={viewportSize.width} height={viewportSize.height}>
-              {texture && renderTexture && (
+              {imageTexture && maskTexture && (
                 <Container x={0} y={0}>
-                  <Sprite texture={texture} />
+                  <Sprite texture={imageTexture} />
                   <MaskingLayer
-                    image={texture}
-                    mask={renderTexture}
+                    image={imageTexture}
+                    mask={maskTexture}
                     brushSize={50}
                     brushColor={0xffffff}
                   />

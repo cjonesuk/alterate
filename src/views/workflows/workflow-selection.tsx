@@ -5,6 +5,7 @@ import { useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import basic_workflow_data from "../../assets/basic_workflow.json";
 import canny_workflow_data from "../../assets/canny_workflow.json";
+import inpainting_workflow_data from "../../assets/inpainting_workflow.json";
 
 interface WorkflowDropzoneProps {
   onDrop: (file: File) => void;
@@ -98,11 +99,18 @@ export function WorkflowSelectionView() {
     });
   };
 
+  const loadInpaintingWorkflow = async () => {
+    await loadWorkspace({
+      workflow: inpainting_workflow_data,
+    });
+  };
+
   return (
     <div className="flex w-full h-full flex-col content-center items-center justify-center gap-4">
       <div className="flex w-full flex-row content-center items-center justify-center gap-4">
         <Button onClick={loadBasicWorkflow}>Basic Workflow</Button>
         <Button onClick={loadCannyWorkflow}>Canny Workflow</Button>
+        <Button onClick={loadInpaintingWorkflow}>Inpainting Workflow</Button>
       </div>
 
       <WorkflowDropzone onDrop={handleDrop}></WorkflowDropzone>

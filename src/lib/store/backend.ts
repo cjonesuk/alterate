@@ -4,6 +4,7 @@ import {
   postPrompt,
   uploadImage,
   interuptPrompt,
+  uploadMask,
 } from "@/lib/comfyui/api";
 import { WebsocketMessage } from "@/lib/comfyui/websocket";
 import { mapObjectInfo } from "@/lib/definition-mapping";
@@ -257,6 +258,11 @@ export const createBackendPart: ImmerStateCreator<
   acceptImage: async (reference, image) => {
     console.log("Accepting image", reference);
 
+    if (reference.type === "invalid") {
+      console.error("Invalid image reference");
+      return;
+    }
+
     const connection = get().backend.connection;
 
     if (!connection) {
@@ -293,6 +299,29 @@ export const createBackendPart: ImmerStateCreator<
       type: "input",
       overwrite: true,
       image: blob,
+    });
+
+    console.log("upload complete", reference);
+
+    return {
+      filename: reference.name,
+      subfolder: reference.subfolder,
+      type: reference.type,
+    };
+  },
+
+  uploadMask: async (mask, originalRef) => {
+    console.log("Uploading mask");
+
+    const connection = get().backend.connection;
+
+    if (!connection) {
+      throw new Error("No connection details available");
+    }
+
+    const reference = await uploadMask(connection, {
+      mask,
+      originalRef,
     });
 
     console.log("upload complete", reference);

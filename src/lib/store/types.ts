@@ -58,6 +58,7 @@ type BackendActions = {
   promptCompleted(promptId: string): Promise<void>;
   acceptImage(reference: ImageReference, image: Blob): Promise<void>;
   uploadImage(file: File): Promise<ImageReference>;
+  uploadMask(mask: Blob, originalRef: ImageReference): Promise<ImageReference>;
   interuptPrompt(): Promise<void>;
 };
 

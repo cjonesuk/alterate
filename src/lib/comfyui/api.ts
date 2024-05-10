@@ -4,6 +4,7 @@ import {
   ImageReference,
   UploadImageRequest,
   UploadImageResult,
+  UploadMaskRequest,
 } from "./images";
 import { ObjectInfoRoot } from "./node-definitions";
 import { WorkflowDocument } from "./workflow";
@@ -112,6 +113,35 @@ export async function uploadImage(
   const root = await res.json();
 
   return root as UploadImageResult;
+}
+
+export async function uploadMask(
+  target: ComfyUITarget,
+  request: UploadMaskRequest
+): Promise<UploadImageResult> {
+  const url = getComfyUiHttpUrl(target, "upload/mask");
+
+  const filename = "clipspace-mask-" + performance.now() + ".png";
+
+  const formData = new FormData();
+  formData.append("image", request.mask, filename);
+  formData.append("original_ref", JSON.stringify(request.originalRef));
+  formData.append("type", "input");
+  formData.append("subfolder", "clipspace");
+
+  const res = await fetch(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  const root = await res.json();
+
+  console.log("Mask upload result", root);
+  return {
+    name: "UNKNOWN",
+    subfolder: "UNKNOWN",
+    type: "input",
+  };
 }
 
 export async function interuptPrompt(target: ComfyUITarget) {

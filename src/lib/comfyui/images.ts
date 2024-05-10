@@ -23,3 +23,8 @@ export interface UploadImageRequest {
   subfolder: string;
   filename: string;
 }
+
+export interface UploadMaskRequest {
+  mask: Blob;
+  originalRef: ImageReference;
+}

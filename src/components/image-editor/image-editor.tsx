@@ -7,9 +7,23 @@ import { useImageReferenceQuery } from "@/lib/image-query";
 import { useBlobObjectUrl } from "@/lib/blob";
 import { useMouseFlow } from "./hooks";
 import { Viewport } from "./viewport";
+import { useAlterateStore } from "@/lib/store";
 
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
+
+// Helper function to convert a data URL to a Blob object
+function dataURLToBlob(dataURL: string) {
+  const parts = dataURL.split(";base64,");
+  const contentType = parts[0].split(":")[1];
+  const byteString = atob(parts[1]);
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+  return new Blob([arrayBuffer], { type: contentType });
+}
 
 interface PaintingLayerProps {
   mask: PIXI.RenderTexture;
@@ -179,6 +193,7 @@ type ViewportSize = {
 export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const result = useImageReferenceQuery(imageReference);
   const { url } = useBlobObjectUrl(result.data);
+  const uploadMask = useAlterateStore((state) => state.uploadMask);
 
   const [imageTexture, setTexture] = useState<PIXI.Texture | null>(null);
 
@@ -269,54 +284,74 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       new PIXI.Rectangle(0, 0, imageTexture.width, imageTexture.height)
     );
 
-    const backupCanvas = document.createElement("canvas");
-    const backupCtx = backupCanvas.getContext("2d", {
-      willReadFrequently: true,
-    });
+    alphaImageDataElement.onload = () => {
+      const backupCanvas = document.createElement("canvas");
+      const backupCtx = backupCanvas.getContext("2d", {
+        willReadFrequently: true,
+        alpha: true,
+      });
 
-    if (!backupCtx) {
-      throw new Error("No context");
-    }
+      if (!backupCtx) {
+        throw new Error("No context");
+      }
 
-    backupCanvas.width = imageTexture.width;
-    backupCanvas.height = imageTexture.height;
+      backupCanvas.width = imageTexture.width;
+      backupCanvas.height = imageTexture.height;
 
-    backupCtx.clearRect(0, 0, backupCanvas.width, backupCanvas.height);
-    backupCtx.drawImage(
-      alphaImageDataElement,
-      0,
-      0,
-      imageTexture.width,
-      imageTexture.height,
-      0,
-      0,
-      backupCanvas.width,
-      backupCanvas.height
-    );
+      backupCtx.clearRect(0, 0, backupCanvas.width, backupCanvas.height);
 
-    // paste mask data into alpha channel
-    const backupData = backupCtx.getImageData(
-      0,
-      0,
-      backupCanvas.width,
-      backupCanvas.height
-    );
+      backupCtx.drawImage(
+        alphaImageDataElement,
+        0,
+        0,
+        backupCanvas.width,
+        backupCanvas.height
+      );
 
-    for (let i = 0; i < backupData.data.length; i += 4) {
-      if (backupData.data[i + 3] == 255) backupData.data[i + 3] = 0;
-      else backupData.data[i + 3] = 255;
+      const intermediateData = backupCanvas.toDataURL();
+      window.open(intermediateData, "_blank");
 
-      backupData.data[i] = 0;
-      backupData.data[i + 1] = 0;
-      backupData.data[i + 2] = 0;
-    }
+      // paste mask data into alpha channel
+      const backupData = backupCtx.getImageData(
+        0,
+        0,
+        backupCanvas.width,
+        backupCanvas.height
+      );
 
-    backupCtx.globalCompositeOperation = "source-over";
-    backupCtx.putImageData(backupData, 0, 0);
+      let tr = 0;
+      let op = 0;
 
-    const dataURL = backupCanvas.toDataURL();
-    window.open(dataURL, "_blank");
-  }, [imageTexture, maskTexture, app]);
+      for (let i = 0; i < backupData.data.length; i += 4) {
+        if (backupData.data[i + 3] > 0) {
+          op++;
+          backupData.data[i + 3] = 0;
+        } else {
+          tr++;
+          backupData.data[i + 3] = 255;
+        }
+
+        backupData.data[i] = 0;
+        backupData.data[i + 1] = 0;
+        backupData.data[i + 2] = 0;
+      }
+
+      console.log("Transparency", { tr, op });
+
+      backupCtx.globalCompositeOperation = "source-over";
+      backupCtx.putImageData(backupData, 0, 0);
+
+      const dataURL = backupCanvas.toDataURL();
+
+      const blob = dataURLToBlob(dataURL);
+
+      uploadMask(blob, imageReference).then((result) => {
+        console.log("mask uploaded");
+      });
+
+      window.open(dataURL, "_blank");
+    };
+  }, [imageTexture, maskTexture, app, uploadMask, imageReference]);
 
   return (
     <div className="flex flex-row">

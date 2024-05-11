@@ -92,11 +92,14 @@ function PaintingLayer({ mask, brushColor, brushSize }: PaintingLayerProps) {
 
 type MaskStyle = "white" | "black" | "negative";
 
+type DrawMode = "draw" | "erase";
+
 interface MaskingLayerProps {
   image: PIXI.Texture;
   mask: PIXI.RenderTexture;
   brushSize: number;
   maskStyle: MaskStyle;
+  drawMode: DrawMode;
 }
 
 function MaskingLayer({
@@ -104,13 +107,14 @@ function MaskingLayer({
   mask,
   brushSize,
   maskStyle,
+  drawMode,
 }: MaskingLayerProps) {
   const app = useApp();
 
   const { width, height } = mask;
 
   const { brush, lineStyle } = useMemo(() => {
-    const brushColor = 0xffffff;
+    const brushColor = drawMode === "draw" ? 0xffffff : 0x000000;
     const brush = new PIXI.Graphics()
       .beginFill(brushColor)
       .drawCircle(0, 0, brushSize)
@@ -119,7 +123,7 @@ function MaskingLayer({
     const lineStyle = { width: brushSize * 2, color: brushColor };
 
     return { brush, lineStyle };
-  }, [brushSize]);
+  }, [brushSize, drawMode]);
 
   const mouseMove = useCallback(
     (point: PIXI.Point, last: PIXI.Point | null) => {
@@ -441,6 +445,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   }, [imageTexture, maskTexture, app, uploadMask, imageReference, onSave]);
 
   const [maskStyle, setMaskStyle] = useState<MaskStyle>("white");
+  const [drawMode, setDrawMode] = useState<DrawMode>("draw");
 
   return (
     <div className="flex flex-row">
@@ -468,6 +473,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
                       mask={maskTexture}
                       brushSize={50}
                       maskStyle={maskStyle}
+                      drawMode={drawMode}
                     />
                   </Container>
                 </Container>
@@ -481,6 +487,13 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
         <Button onClick={() => setMaskStyle("white")}>White</Button>
         <Button onClick={() => setMaskStyle("black")}>Black</Button>
         <Button onClick={() => setMaskStyle("negative")}>Negative</Button>
+        <Button
+          onClick={() =>
+            setDrawMode((prev) => (prev === "draw" ? "erase" : "draw"))
+          }
+        >
+          {drawMode === "draw" ? "Draw" : "Erase"}
+        </Button>
       </div>
     </div>
   );

@@ -6,7 +6,6 @@ import {
   ImageReferenceViewOptions,
 } from "./comfyui/images";
 import { useAlterateStore } from "./store";
-import { channel } from "diagnostics_channel";
 import { useMemo } from "react";
 
 export function useImageReferenceQuery(
@@ -48,10 +47,12 @@ export function useImageAndMaskUrls(
 
     const alpha = makeImageUrl(connection, imageReference, {
       channel: "a",
+      random: Math.random(),
     });
 
     const rgb = makeImageUrl(connection, imageReference, {
       channel: "rgb",
+      random: Math.random(),
     });
 
     return { alpha, rgb };

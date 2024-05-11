@@ -3,7 +3,7 @@ import { Container, Sprite, Stage, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { useImageReferenceQuery } from "@/lib/image-query";
+import { useImageAndMaskUrls, useImageReferenceQuery } from "@/lib/image-query";
 import { useBlobObjectUrl } from "@/lib/blob";
 import { useMouseFlow } from "./hooks";
 import { Viewport } from "./viewport";
@@ -191,28 +191,31 @@ type ViewportSize = {
 };
 
 export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
-  const result = useImageReferenceQuery(imageReference);
-  const { url } = useBlobObjectUrl(result.data);
+  // const result = useImageReferenceQuery(imageReference);
+  // const { url } = useBlobObjectUrl(result.data);
+
+  const urls = useImageAndMaskUrls(imageReference);
+
   const uploadMask = useAlterateStore((state) => state.uploadMask);
 
-  const [imageTexture, setTexture] = useState<PIXI.Texture | null>(null);
+  const [imageTexture, setImageTexture] = useState<PIXI.Texture | null>(null);
 
   const [app, setApp] = useState<PIXI.Application | null>(null);
 
   useEffect(() => {
-    if (!url) {
+    if (!urls) {
       return;
     }
 
-    const texture = PIXI.Texture.from(url);
+    const texture = PIXI.Texture.from(urls.rgb);
     texture.on("update", () => {
       console.log("loaded", { valid: texture.valid });
 
       if (texture.valid) {
-        setTexture(texture);
+        setImageTexture(texture);
       }
     });
-  }, [url]);
+  }, [urls]);
 
   // destroy the texture when we're done?
   const maskTexture = useMemo(() => {
@@ -369,12 +372,12 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
               {imageTexture && maskTexture && (
                 <Container x={0} y={0}>
                   <Sprite texture={imageTexture} />
-                  <MaskingLayer
+                  {/* <MaskingLayer
                     image={imageTexture}
                     mask={maskTexture}
                     brushSize={50}
                     brushColor={0xffffff}
-                  />
+                  /> */}
                 </Container>
               )}
             </Viewport>

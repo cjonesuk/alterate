@@ -41,7 +41,7 @@ export function useImageAndMaskUrls(
   }
 
   const urls = useMemo(() => {
-    if (!imageReference) {
+    if (!imageReference || imageReference === EmptyImageReference) {
       return null;
     }
 

@@ -7,22 +7,10 @@
       "sampler_name": "euler",
       "scheduler": "normal",
       "denoise": 1,
-      "model": [
-        "4",
-        0
-      ],
-      "positive": [
-        "6",
-        0
-      ],
-      "negative": [
-        "7",
-        0
-      ],
-      "latent_image": [
-        "11",
-        0
-      ]
+      "model": ["4", 0],
+      "positive": ["6", 0],
+      "negative": ["7", 0],
+      "latent_image": ["11", 0]
     },
     "class_type": "KSampler",
     "_meta": {
@@ -41,10 +29,7 @@
   "6": {
     "inputs": {
       "text": "a photo of an orange on a table",
-      "clip": [
-        "4",
-        1
-      ]
+      "clip": ["4", 1]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -54,10 +39,7 @@
   "7": {
     "inputs": {
       "text": "text, watermark",
-      "clip": [
-        "4",
-        1
-      ]
+      "clip": ["4", 1]
     },
     "class_type": "CLIPTextEncode",
     "_meta": {
@@ -66,14 +48,8 @@
   },
   "8": {
     "inputs": {
-      "samples": [
-        "3",
-        0
-      ],
-      "vae": [
-        "4",
-        2
-      ]
+      "samples": ["3", 0],
+      "vae": ["4", 2]
     },
     "class_type": "VAEDecode",
     "_meta": {
@@ -83,10 +59,7 @@
   "9": {
     "inputs": {
       "filename_prefix": "ComfyUI",
-      "images": [
-        "8",
-        0
-      ]
+      "images": ["8", 0]
     },
     "class_type": "SaveImage",
     "_meta": {
@@ -95,7 +68,7 @@
   },
   "10": {
     "inputs": {
-      "image": "clipspace/clipspace-mask-2825989.png [input]",
+      "image": "fruit.png [input]",
       "upload": "image"
     },
     "class_type": "LoadImage",
@@ -106,18 +79,9 @@
   "11": {
     "inputs": {
       "grow_mask_by": 6,
-      "pixels": [
-        "10",
-        0
-      ],
-      "vae": [
-        "4",
-        2
-      ],
-      "mask": [
-        "10",
-        1
-      ]
+      "pixels": ["10", 0],
+      "vae": ["4", 2],
+      "mask": ["10", 1]
     },
     "class_type": "VAEEncodeForInpaint",
     "_meta": {

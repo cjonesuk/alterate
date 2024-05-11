@@ -245,15 +245,14 @@ function ImageDropzone({
 }
 
 interface ImageReferenceKeyValue {
-  key: string;
   value: string;
+  display: string;
   reference: ImageReference;
 }
 function mapImageReferenceToOption(
-  imageReference: ImageReference
+  imageReference: ImageReference | undefined
 ): ImageReferenceKeyValue | undefined {
-  if (imageReference === EmptyImageReference) {
-    console.log("empty", imageReference);
+  if (imageReference === undefined || imageReference === EmptyImageReference) {
     return undefined;
   }
 
@@ -262,8 +261,8 @@ function mapImageReferenceToOption(
     : imageReference.filename;
 
   return {
-    key: `${imageReference.type}-${filenamePart}`,
-    value: filenamePart,
+    value: `${filenamePart} [${imageReference.type}]`,
+    display: filenamePart,
     reference: imageReference,
   };
 }
@@ -277,7 +276,6 @@ export function ImageFilenamesFormField({
 
   const save = useCallback(
     (mr: ImageReference) => {
-      console.log("save", mr);
       setOpen(false);
       form.setValue(input.fieldId, mr);
     },
@@ -289,17 +287,17 @@ export function ImageFilenamesFormField({
   const imageReferences = definition.values;
 
   const options: ImageReferenceKeyValue[] = useMemo(() => {
-    const all =
+    const append =
       imageReference &&
       imageReference !== EmptyImageReference &&
-      !imageReferences.includes(imageReference)
-        ? [...imageReferences, imageReference]
-        : imageReferences;
+      !imageReferences.includes(imageReference);
+
+    const all = append ? [...imageReferences, imageReference] : imageReferences;
 
     const mapped = all
       .map(mapImageReferenceToOption)
       .filter(Boolean) as ImageReferenceKeyValue[];
-    console.log("all", { all, mapped });
+
     return mapped;
   }, [imageReference, imageReferences]);
 
@@ -310,28 +308,22 @@ export function ImageFilenamesFormField({
       defaultValue={input.value}
       render={({ field }) => {
         const fieldValue = field.value as ImageReference | undefined;
-        const cnv = mapImageReferenceToOption(
-          fieldValue ?? EmptyImageReference
-        );
 
-        console.log("debug", {
-          fieldValue,
-          cnv,
-          imageReference,
-          options,
-        });
+        const selectedOption =
+          mapImageReferenceToOption(fieldValue) ?? options[0];
+
         return (
           <FormItem className="flex flex-row gap-1">
             <FormLabel className="flex-1">{definition.name}</FormLabel>
             <div className="flex flex-col gap-1">
               <Select
                 onValueChange={(ev) => {
-                  const next = options.find((o) => o.key === ev)?.reference;
+                  const next = options.find((o) => o.value === ev)?.reference;
                   console.log("onValueChange", { ev, next });
                   field.onChange(next);
                 }}
-                defaultValue={options[0]?.key}
-                value={cnv?.key}
+                defaultValue={selectedOption?.value}
+                value={selectedOption?.value}
               >
                 <FormControl className="flex-1">
                   <SelectTrigger>
@@ -339,9 +331,9 @@ export function ImageFilenamesFormField({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {options.map(({ key, value }) => (
-                    <SelectItem key={key} value={key}>
-                      {value}
+                  {options.map(({ value, display }) => (
+                    <SelectItem key={value} value={value}>
+                      {display}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -272,11 +272,7 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
 
         // invert mask
         for (let i = 0; i < firstPixels.length; i += 4) {
-          if (firstPixels[i + 3] === 255) {
-            firstPixels[i + 3] = 0;
-          } else {
-            firstPixels[i + 3] = 255;
-          }
+          firstPixels[i + 3] = 255 - firstPixels[i + 3];
           firstPixels[i] = 255;
           firstPixels[i + 1] = 255;
           firstPixels[i + 2] = 255;
@@ -411,24 +407,15 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
         backupCanvas.height
       );
 
-      let tr = 0;
-      let op = 0;
-
       for (let i = 0; i < backupData.data.length; i += 4) {
-        if (backupData.data[i + 3] === 255) {
-          op++;
-          backupData.data[i + 3] = 0;
-        } else {
-          tr++;
-          backupData.data[i + 3] = 255;
-        }
+        // The alpha channel is the red channel inverted
+        // set the RGB values to 0
 
+        backupData.data[i + 3] = 255 - backupData.data[i];
         backupData.data[i] = 0;
         backupData.data[i + 1] = 0;
         backupData.data[i + 2] = 0;
       }
-
-      console.log("Transparency", { tr, op });
 
       backupCtx.globalCompositeOperation = "source-over";
       backupCtx.putImageData(backupData, 0, 0);

@@ -1,5 +1,5 @@
 import { ImageReference } from "@/lib/comfyui/images";
-import { Container, Sprite, Stage, useApp } from "@pixi/react";
+import { Container, Graphics, Sprite, Stage, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
@@ -90,22 +90,27 @@ function PaintingLayer({ mask, brushColor, brushSize }: PaintingLayerProps) {
   );
 }
 
+type MaskStyle = "white" | "black" | "negative";
+
 interface MaskingLayerProps {
   image: PIXI.Texture;
   mask: PIXI.RenderTexture;
-  brushColor: number;
   brushSize: number;
+  maskStyle: MaskStyle;
 }
 
 function MaskingLayer({
   image,
   mask,
-  brushColor,
   brushSize,
+  maskStyle,
 }: MaskingLayerProps) {
   const app = useApp();
 
+  const { width, height } = mask;
+
   const { brush, lineStyle } = useMemo(() => {
+    const brushColor = 0xffffff;
     const brush = new PIXI.Graphics()
       .beginFill(brushColor)
       .drawCircle(0, 0, brushSize)
@@ -114,7 +119,7 @@ function MaskingLayer({
     const lineStyle = { width: brushSize * 2, color: brushColor };
 
     return { brush, lineStyle };
-  }, [brushColor, brushSize]);
+  }, [brushSize]);
 
   const mouseMove = useCallback(
     (point: PIXI.Point, last: PIXI.Point | null) => {
@@ -148,56 +153,52 @@ function MaskingLayer({
     onMove: mouseMove,
   });
 
-  const negative = false;
-
   const { filters } = useMemo(() => {
-    //   return { filters: [] };
-    const negativeFilter = new PIXI.ColorMatrixFilter();
-    negativeFilter.negative(false);
+    if (maskStyle === "negative") {
+      const negativeFilter = new PIXI.ColorMatrixFilter();
+      negativeFilter.negative(false);
 
-    return { filters: [negativeFilter] };
-  }, []);
-
-  // const { masking, filters } = useMemo(() => {
-  //   const negativeFilter = new PIXI.ColorMatrixFilter();
-  //   negativeFilter.negative(false);
-  //  // const masking = new PIXI.Sprite(mask);
-
-  //   return { masking, filters: [negativeFilter] };
-  // }, [mask]);
+      return { filters: [negativeFilter] };
+    }
+    return { filters: [] };
+  }, [maskStyle]);
 
   const maskRef = useRef<PIXI.Sprite>(null);
 
-  if (negative) {
-    return (
-      <Container>
-        <Sprite texture={mask} renderable={false} ref={maskRef} />
+  return (
+    <Container
+      interactive={true}
+      onpointerdown={pointerDown}
+      onpointerup={pointerUp}
+      pointerupoutside={pointerUp}
+      pointermove={pointerMove}
+    >
+      <Sprite texture={mask} renderable={false} ref={maskRef} />
+
+      {(maskStyle === "white" || maskStyle === "black") && (
+        <Graphics
+          mask={maskRef.current}
+          draw={(g: PIXI.Graphics) => {
+            g.alpha = 0.4;
+            g.beginFill(maskStyle === "white" ? 0xffffff : 0x000000);
+            g.drawRect(0, 0, width, height);
+            g.endFill();
+          }}
+        />
+      )}
+
+      {maskStyle === "negative" && (
         <Sprite
           interactive={true}
-          texture={image}
           mask={maskRef.current}
+          texture={image}
           filters={filters}
           onpointerdown={pointerDown}
           onpointerup={pointerUp}
           pointerupoutside={pointerUp}
           pointermove={pointerMove}
         />
-      </Container>
-    );
-  }
-
-  return (
-    <Container>
-      <Sprite texture={mask} renderable={false} ref={maskRef} />
-      <Sprite
-        interactive={true}
-        mask={maskRef.current}
-        texture={mask}
-        onpointerdown={pointerDown}
-        onpointerup={pointerUp}
-        pointerupoutside={pointerUp}
-        pointermove={pointerMove}
-      />
+      )}
     </Container>
   );
 }
@@ -439,6 +440,8 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
     };
   }, [imageTexture, maskTexture, app, uploadMask, imageReference, onSave]);
 
+  const [maskStyle, setMaskStyle] = useState<MaskStyle>("white");
+
   return (
     <div className="flex flex-row">
       <div className="w-full h-full overflow-hidden" ref={containerRef}>
@@ -463,8 +466,8 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
                     <MaskingLayer
                       image={imageTexture}
                       mask={maskTexture}
-                      brushSize={100}
-                      brushColor={0xffffff}
+                      brushSize={50}
+                      maskStyle={maskStyle}
                     />
                   </Container>
                 </Container>
@@ -475,6 +478,9 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       </div>
       <div className="flex flex-col gap-4 p-4">
         <Button onClick={handleSave}>Save</Button>
+        <Button onClick={() => setMaskStyle("white")}>White</Button>
+        <Button onClick={() => setMaskStyle("black")}>Black</Button>
+        <Button onClick={() => setMaskStyle("negative")}>Negative</Button>
       </div>
     </div>
   );

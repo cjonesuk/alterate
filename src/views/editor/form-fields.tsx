@@ -244,6 +244,30 @@ function ImageDropzone({
   );
 }
 
+interface ImageReferenceKeyValue {
+  key: string;
+  value: string;
+  reference: ImageReference;
+}
+function mapImageReferenceToOption(
+  imageReference: ImageReference
+): ImageReferenceKeyValue | undefined {
+  if (imageReference === EmptyImageReference) {
+    console.log("empty", imageReference);
+    return undefined;
+  }
+
+  const filenamePart = imageReference.subfolder
+    ? `${imageReference.subfolder}/${imageReference.filename}`
+    : imageReference.filename;
+
+  return {
+    key: `${imageReference.type}-${filenamePart}`,
+    value: filenamePart,
+    reference: imageReference,
+  };
+}
+
 export function ImageFilenamesFormField({
   definition,
   input,
@@ -251,19 +275,31 @@ export function ImageFilenamesFormField({
 }: InputFormFieldProps<ImageFilenamesType>) {
   const [open, setOpen] = useDialogControl();
 
-  const save = useCallback(() => {
-    console.log("save");
-  }, []);
-
-  const imageFilename: string | undefined = form.watch(input.fieldId);
-
-  const imageReference: ImageReference | null = useMemo(
-    () =>
-      imageFilename
-        ? { filename: imageFilename, subfolder: "", type: "input" }
-        : null,
-    [imageFilename]
+  const save = useCallback(
+    (mr: ImageReference) => {
+      console.log("save", mr);
+      setOpen(false);
+      form.setValue(input.fieldId, mr);
+    },
+    [setOpen, form, input.fieldId]
   );
+
+  const imageReference: ImageReference | undefined = form.watch(input.fieldId);
+
+  const imageReferences = definition.values;
+
+  const options: ImageReferenceKeyValue[] = useMemo(() => {
+    const all =
+      imageReference && imageReference !== EmptyImageReference
+        ? [...imageReferences, imageReference]
+        : imageReferences;
+
+    const mapped = all
+      .map(mapImageReferenceToOption)
+      .filter(Boolean) as ImageReferenceKeyValue[];
+    console.log("all", { all, mapped });
+    return mapped;
+  }, [imageReference, imageReferences]);
 
   return (
     <FormField
@@ -271,15 +307,29 @@ export function ImageFilenamesFormField({
       name={input.fieldId}
       defaultValue={input.value}
       render={({ field }) => {
-        const appendEntry = !definition.values.includes(field.value);
+        const fieldValue = field.value as ImageReference | undefined;
+        const cnv = mapImageReferenceToOption(
+          fieldValue ?? EmptyImageReference
+        );
+
+        console.log("debug", {
+          fieldValue,
+          cnv,
+          imageReference,
+          options,
+        });
         return (
           <FormItem className="flex flex-row gap-1">
             <FormLabel className="flex-1">{definition.name}</FormLabel>
             <div className="flex flex-col gap-1">
               <Select
-                onValueChange={field.onChange}
-                defaultValue={field.value}
-                value={field.value}
+                onValueChange={(ev) => {
+                  const next = options.find((o) => o.key === ev)?.reference;
+                  console.log("onValueChange", { ev, next });
+                  field.onChange(next);
+                }}
+                defaultValue={options[0]?.key}
+                value={cnv?.key}
               >
                 <FormControl className="flex-1">
                   <SelectTrigger>
@@ -287,16 +337,11 @@ export function ImageFilenamesFormField({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {definition.values.map((value) => (
-                    <SelectItem key={value} value={value}>
+                  {options.map(({ key, value }) => (
+                    <SelectItem key={key} value={key}>
                       {value}
                     </SelectItem>
                   ))}
-                  {appendEntry && (
-                    <SelectItem key={field.value} value={field.value}>
-                      {field.value}
-                    </SelectItem>
-                  )}
                 </SelectContent>
               </Select>
               <FormMessage />

@@ -1,3 +1,4 @@
+import { ImageReference } from "./comfyui/images";
 import {
   FluffyRequired,
   Input,
@@ -57,7 +58,7 @@ export type StringValuesType = NodeInput & {
 
 export type ImageFilenamesType = NodeInput & {
   type: typeof InputTypes.IMAGE_FILENAMES;
-  values: string[];
+  values: ImageReference[];
 };
 
 export type IgnoredType = NodeInput & {
@@ -89,11 +90,19 @@ function mapInput(
 
     if (type instanceof Array) {
       if (properties?.image_upload) {
+        const filenames = type as string[];
+        const defaultInputFilenames: ImageReference[] = filenames.map(
+          (filename) => ({
+            filename: filename,
+            subfolder: "",
+            type: "input",
+          })
+        );
         return {
           type: InputTypes.IMAGE_FILENAMES,
           required: true,
           name: inputName,
-          values: type as string[],
+          values: defaultInputFilenames,
         };
       }
 

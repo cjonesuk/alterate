@@ -4,6 +4,12 @@ export interface ImageReference {
   type: "input" | "temp" | "output" | "invalid";
 }
 
+export interface ImageReferenceViewOptions {
+  preview?: boolean;
+  random?: number;
+  channel?: "a" | "rgb" | undefined;
+}
+
 export const EmptyImageReference: ImageReference = {
   filename: "",
   subfolder: "",

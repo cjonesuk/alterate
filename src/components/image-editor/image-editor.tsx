@@ -181,7 +181,7 @@ function MaskingLayer({
 }
 
 export interface ImageEditorProps {
-  onSave: () => void;
+  onSave: (maskReference: ImageReference) => void;
   imageReference: ImageReference;
 }
 
@@ -308,9 +308,6 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
         backupCanvas.height
       );
 
-      const intermediateData = backupCanvas.toDataURL();
-      window.open(intermediateData, "_blank");
-
       // paste mask data into alpha channel
       const backupData = backupCtx.getImageData(
         0,
@@ -346,12 +343,11 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       const blob = dataURLToBlob(dataURL);
 
       uploadMask(blob, imageReference).then((result) => {
-        console.log("mask uploaded");
+        console.log("mask uploaded", result);
+        onSave(result);
       });
-
-      window.open(dataURL, "_blank");
     };
-  }, [imageTexture, maskTexture, app, uploadMask, imageReference]);
+  }, [imageTexture, maskTexture, app, uploadMask, imageReference, onSave]);
 
   return (
     <div className="flex flex-row">

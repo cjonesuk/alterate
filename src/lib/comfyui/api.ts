@@ -2,6 +2,7 @@ import { ComfyUITarget } from "./connection";
 import { HistoryResult } from "./history";
 import {
   ImageReference,
+  ImageReferenceViewOptions,
   UploadImageRequest,
   UploadImageResult,
   UploadMaskRequest,
@@ -66,12 +67,28 @@ export async function postPrompt(
   return resp.prompt_id;
 }
 
-export function makeImageUrl(target: ComfyUITarget, image: ImageReference) {
+export function makeImageUrl(
+  target: ComfyUITarget,
+  image: ImageReference,
+  options: ImageReferenceViewOptions
+) {
   const search = new URLSearchParams();
 
   search.append("filename", image.filename);
   search.append("subfolder", image.subfolder);
   search.append("type", image.type);
+
+  if (options.preview) {
+    search.append("preview", "jpeg");
+  }
+
+  if (options.random) {
+    search.append("random", options.random.toString());
+  }
+
+  if (options.channel) {
+    search.append("channel", options.channel);
+  }
 
   const searchString = search.toString();
 
@@ -80,8 +97,12 @@ export function makeImageUrl(target: ComfyUITarget, image: ImageReference) {
   return url;
 }
 
-export async function fetchImage(target: ComfyUITarget, image: ImageReference) {
-  const url = makeImageUrl(target, image);
+export async function fetchImage(
+  target: ComfyUITarget,
+  image: ImageReference,
+  options: ImageReferenceViewOptions
+) {
+  const url = makeImageUrl(target, image, options);
 
   const res = await fetch(url, {
     method: "GET",
@@ -135,13 +156,8 @@ export async function uploadMask(
   });
 
   const root = await res.json();
-
   console.log("Mask upload result", root);
-  return {
-    name: "UNKNOWN",
-    subfolder: "UNKNOWN",
-    type: "input",
-  };
+  return root as UploadImageResult;
 }
 
 export async function interuptPrompt(target: ComfyUITarget) {

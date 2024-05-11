@@ -1,15 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { useBlobObjectUrl } from "@/lib/blob";
-import { ImageReference } from "@/lib/comfyui/images";
+import {
+  ImageReference,
+  ImageReferenceViewOptions,
+} from "@/lib/comfyui/images";
 import { useImageReferenceQuery } from "@/lib/image-query";
 import { useAlterateStore } from "@/lib/store";
 
 interface Props {
   image: ImageReference;
+  options?: ImageReferenceViewOptions;
 }
 
-export function ImageReferenceImage({ image }: Props) {
-  const { data } = useImageReferenceQuery(image);
+export function ImageReferenceImage({ image, options = {} }: Props) {
+  const { data } = useImageReferenceQuery(image, options);
   const { url } = useBlobObjectUrl(data);
 
   if (!url) {

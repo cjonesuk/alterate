@@ -3,14 +3,12 @@ import { Container, Sprite, Stage, useApp } from "@pixi/react";
 import * as PIXI from "pixi.js";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "../ui/button";
-import { useImageAndMaskUrls, useImageReferenceQuery } from "@/lib/image-query";
-import { useBlobObjectUrl } from "@/lib/blob";
+import { useImageAndMaskUrls } from "@/lib/image-query";
 import { useMouseFlow } from "./hooks";
 import { Viewport } from "./viewport";
 import { useAlterateStore } from "@/lib/store";
 
 import P5 from "p5";
-import { text } from "stream/consumers";
 
 // Create a line that will interpolate the drawn points
 const line = new PIXI.Graphics();
@@ -216,7 +214,7 @@ type ViewportSize = {
 
 export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
   const urls = useImageAndMaskUrls(imageReference);
-  console.log("urls", urls);
+
   const uploadMask = useAlterateStore((state) => state.uploadMask);
 
   const [imageTexture, setImageTexture] = useState<PIXI.Texture | null>(null);
@@ -231,13 +229,9 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       return;
     }
 
-    console.log("loading RGB texture", urls.rgb);
-
     const sourceRgb = PIXI.Texture.from(urls.rgb);
     sourceRgb
       .on("update", () => {
-        console.log("loaded texture", { valid: sourceRgb.valid });
-
         if (sourceRgb.valid) {
           setImageTexture(sourceRgb);
 
@@ -260,21 +254,19 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
       p5.setup = () => {
         p5.noLoop();
 
+        if (!app) {
+          throw new Error("No app");
+        }
+
+        if (!app.renderer) {
+          throw new Error("No renderer");
+        }
+
         alphaImage.loadPixels();
         const firstPixels = alphaImage.pixels;
 
         // invert mask
-        let done = false;
         for (let i = 0; i < firstPixels.length; i += 4) {
-          if (!done) {
-            console.log(
-              "FIRST PIXEL: ",
-              firstPixels[i],
-              firstPixels[i + 1],
-              firstPixels[i + 2],
-              firstPixels[i + 3]
-            );
-          }
           if (firstPixels[i + 3] === 255) {
             firstPixels[i + 3] = 0;
           } else {
@@ -283,35 +275,18 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
           firstPixels[i] = 255;
           firstPixels[i + 1] = 255;
           firstPixels[i + 2] = 255;
-
-          if (!done) {
-            console.log(
-              "AFTER PIXEL: ",
-              firstPixels[i],
-              firstPixels[i + 1],
-              firstPixels[i + 2],
-              firstPixels[i + 3]
-            );
-            done = true;
-          }
         }
 
+        // Save changes and calculate premultiplied alpha
         alphaImage.updatePixels();
 
+        // Reload the updated pixel data
         alphaImage.loadPixels();
 
-        console.log(
-          "RELOAD PIXEL: ",
-          alphaImage.pixels[0],
-          alphaImage.pixels[0 + 1],
-          alphaImage.pixels[0 + 2],
-          alphaImage.pixels[0 + 3]
-        );
-
+        // Convert to 8 bit per pixel RGBA
         const uint8Array: Uint8Array = Uint8Array.from(alphaImage.pixels);
 
-        console.log("got data 2", uint8Array.length);
-
+        // Create the mask texture
         const preparedMask = PIXI.Texture.fromBuffer(
           uint8Array,
           alphaImage.width,
@@ -321,53 +296,20 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
           }
         );
 
-        console.log(
-          "valid?",
-          preparedMask.valid,
-          preparedMask.width,
-          preparedMask.height
-        );
-
-        if (!app) {
-          throw new Error("No app");
-          return;
-        }
-
-        if (!app.renderer) {
-          throw new Error("No renderer");
-          return;
-        }
-
+        // Create the mask render texture
         const renderTexture = PIXI.RenderTexture.create({
           width: alphaImage.width,
           height: alphaImage.height,
           format: PIXI.FORMATS.RGBA,
         });
 
-        renderTexture.on("update", () => {
-          console.log("update render texture!?");
-        });
-        const container = new PIXI.Container();
-
+        // Render the mask texture to the render texture
         const preparedMaskSprite = new PIXI.Sprite(preparedMask);
-        preparedMaskSprite.blendMode = PIXI.BLEND_MODES.NORMAL;
 
-        container.addChild(preparedMaskSprite);
-
-        app.renderer.render(container, {
+        app.renderer.render(preparedMaskSprite, {
           renderTexture,
           clear: true,
         });
-
-        console.log("GETTING RENDER TEXTURE PIXELS!?");
-        const pixels333 = app.renderer.extract.pixels(preparedMaskSprite);
-        console.log(
-          "RENDER TEXTURE PIXEL: ",
-          pixels333[0],
-          pixels333[0 + 1],
-          pixels333[0 + 2],
-          pixels333[0 + 3]
-        );
 
         setMaskTexture(renderTexture);
       };

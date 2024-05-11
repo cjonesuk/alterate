@@ -290,7 +290,9 @@ export function ImageFilenamesFormField({
 
   const options: ImageReferenceKeyValue[] = useMemo(() => {
     const all =
-      imageReference && imageReference !== EmptyImageReference
+      imageReference &&
+      imageReference !== EmptyImageReference &&
+      !imageReferences.includes(imageReference)
         ? [...imageReferences, imageReference]
         : imageReferences;
 

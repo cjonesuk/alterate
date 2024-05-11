@@ -169,6 +169,23 @@ function MaskingLayer({
 
   const maskRef = useRef<PIXI.Sprite>(null);
 
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    setReady(true);
+  }, []);
+
+  const draw = useCallback(
+    (g: PIXI.Graphics) => {
+      g.clear();
+      g.alpha = 0.4;
+      g.beginFill(maskStyle === "white" ? 0xffffff : 0x000000);
+      g.drawRect(0, 0, width, height);
+      g.endFill();
+    },
+    [width, height, maskStyle]
+  );
+
   return (
     <Container
       interactive={true}
@@ -179,19 +196,11 @@ function MaskingLayer({
     >
       <Sprite texture={mask} renderable={false} ref={maskRef} />
 
-      {(maskStyle === "white" || maskStyle === "black") && (
-        <Graphics
-          mask={maskRef.current}
-          draw={(g: PIXI.Graphics) => {
-            g.alpha = 0.4;
-            g.beginFill(maskStyle === "white" ? 0xffffff : 0x000000);
-            g.drawRect(0, 0, width, height);
-            g.endFill();
-          }}
-        />
+      {ready && (maskStyle === "white" || maskStyle === "black") && (
+        <Graphics mask={maskRef.current} draw={draw} />
       )}
 
-      {maskStyle === "negative" && (
+      {ready && maskStyle === "negative" && (
         <Sprite
           interactive={true}
           mask={maskRef.current}
@@ -451,20 +460,19 @@ export function ImageEditor({ onSave, imageReference }: ImageEditorProps) {
             }}
           >
             <Viewport width={viewportSize.width} height={viewportSize.height}>
-              {imageTexture && maskTexture && (
-                <Container x={0} y={0}>
-                  <Sprite texture={imageTexture} />
-                  <Container x={0} y={0}>
-                    <MaskingLayer
-                      image={imageTexture}
-                      mask={maskTexture}
-                      brushSize={50}
-                      maskStyle={maskStyle}
-                      drawMode={drawMode}
-                    />
-                  </Container>
-                </Container>
-              )}
+              <Container x={0} y={0}>
+                {imageTexture && <Sprite texture={imageTexture} />}
+
+                {imageTexture && maskTexture && (
+                  <MaskingLayer
+                    image={imageTexture}
+                    mask={maskTexture}
+                    brushSize={50}
+                    maskStyle={maskStyle}
+                    drawMode={drawMode}
+                  />
+                )}
+              </Container>
             </Viewport>
           </Stage>
         )}
